@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>fatterOS</title>
+	<link href="css/common.css" rel="stylesheet" type="text/css" />
+	<link href="css/index.css" rel="stylesheet" type="text/css" />
+	<link href="css/fwindow.css" rel="stylesheet" type="text/css" />
+	<link href="css/filemgr.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/common.js"></script>
+	<script type="text/javascript" src="js/jquery.progressbar.min.js"></script>
+	<script type="text/javascript" src="js/fatterOS.js"></script>
+	<script type="text/javascript">
+//	　　　function RunOnBeforeUnload() { return "你确定要退出么";  }
+　//　		　window.onbeforeunload = RunOnBeforeUnload;
+	</script>
+</head>
+<body>
+<div id="starting_container">
+  <div id="starting_logo">
+    <img src="images/start_1.png" alt="starting"/>
+  </div>
+  <div id="starting_text">
+  	Starting...
+  </div>
+  <div id="starting_bar">
+  </div>
+</div>
+<div id="desktop">
+	<div id="desktop_button_container">
+		<div id="app_001" data-name="时间" class="app-button" style="left: 0px; top: 30px;">
+			<div class="app-icon" style="background-image:url(images/clock.png)">
+			</div>
+			<div class="app-name-wrap">
+				<div class="app-name">时间</div>
+			</div>
+		</div>
+		<div id="app_002" data-name="豆瓣FM" class="app-button" style="left: 0px; top: 110px;">
+			<div class="app-icon" style="background-image:url(images/mid.png)">
+			</div>
+			<div class="app-name-wrap">
+				<div class="app-name">豆瓣FM</div>
+			</div>
+		</div>
+		<div id="app_003" data-name="系统设置" class="app-button" style="left: 0px; top: 190px;">
+			<div class="app-icon" style="background-image:url(images/Control_Panel.png)">
+			</div>
+			<div class="app-name-wrap">
+				<div class="app-name">系统设置</div>
+			</div>        
+		</div>
+		<div id="app_004" data-name="浏览器" class="app-button" style="left: 80px; top: 30px;">
+			<div class="app-icon" style="background-image:url(images/browser.png)">
+			</div>
+			<div class="app-name-wrap">
+				<div class="app-name">浏览器</div>
+			</div>        
+		</div>
+		<div id="app_005" data-name="记事本" class="app-button" style="left: 80px; top: 110px;">
+			<div class="app-icon" style="background-image:url(images/notepad.png)">
+			</div>
+			<div class="app-name-wrap">
+				<div class="app-name">记事本</div>
+			</div>        
+		</div>
+		<div id="app_006" data-name="资源管理器" data-type="filemgr" class="app-button" style="left: 80px; top: 190px;">
+			<div class="app-icon" style="background-image:url(images/winrar.png)">
+			</div>
+			<div class="app-name-wrap">
+				<div class="app-name">资源管理器</div>
+			</div>        
+		</div>
+	</div>
+</div>
+<div id="bottombar">
+	<div id="bottom_body">
+		<div id="start_button">
+			<img alt="开始" src="images/start_1.png" id="start_icon"/>
+		</div>
+		<div id="start_menu">
+			<div id="start_menu_body">
+				<div class="start-app">
+					<span class="start-app-button logout"></span>
+					<a href="#">注销</a>
+				</div>
+				<div class="start-app">
+					<span class="start-app-button logout"></span>
+					<a href="#">注销</a>
+				</div>
+				<div class="start-app">
+					<span class="start-app-button logout"></span>
+					<a href="#">注销</a>
+				</div>
+				<div class="start-app">
+					<span class="start-app-button shortcut"></span>
+					<a href="#">桌面图标</a>
+				</div>
+				<div class="start-app">
+					<span class="start-app-button setting"></span>
+					<a href="#">设置</a>
+				</div>
+				<div class="start-app" id="start_app_help">
+					<span class="start-menu_arrow"></span>
+					<span class="start-app-button help"></span>
+					<a href="#">帮助</a>
+				</div>
+				<div class="start-app">
+					<span class="start-app-button lock"></span>
+					<a href="#">锁定</a>
+				</div>
+				<div id="start_app_sub_container">
+					<div id="start_app_sub_body">	
+						<div class="start-sub-top">
+						</div>
+						<div class="start-app-sub">
+							<span class="start-app-button logout"></span>
+							<a href="#">注销</a>
+						</div>
+						<div class="start-app-sub">
+							<span class="start-app-button setting"></span>
+							<a href="#">设置</a>
+						</div>
+						<div class="start-app-sub">
+							<span class="start_app-button lock"></span>
+							<a href="#">锁定</a>
+						</div>
+						<div class="start-sub-bottom">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="start_menu_right">
+				<div id="user_info">
+					<div id="user_pic">
+						<img alt="admin" src="images/user-info.gif"/>
+					</div>
+					<div id="user_name">
+						fatter
+					</div>
+				</div>
+				<div id="start_app_right">
+					<div>
+						<span class="start-app-button logout"></span>
+						<a href="#">注销</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="quick_start">
+			<img alt="PS" src="images/PhotoshopCS.png" id="quick_icon_1"/>
+			<img alt="Office" src="images/office_2003.png" id="quick_icon_2"/>
+		</div>
+		<div id="taskbar">
+		</div>
+		<div id="notice">
+			<div id="timebar"></div>	
+		</div>
+		<div id="showDesktop" title="显示桌面">
+		</div>
+	</div>
+</div>
+<div class="pagelet-search-bar">
+	<input value="搜索..." class="pagelet-search-input" id="search_input">	
+	<input type="button" title="搜索..." class="pagelet-search-button" id="search_button" value="">
+</div>
+<div id="fatterOS_context"></div>
+<div class="scene-cloud-container" style="width: 1366px; height: 307px;">
+	<div class="scene-cloud" style="left: 240px;"></div>
+</div>
+<div class="fwindow-resize-helper"></div>
+</body>
+</html>
