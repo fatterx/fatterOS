@@ -1,6 +1,11 @@
 ﻿body,p,b,dl,dd,table,td,th,input,img,form,div,ul,li
-{margin:0;padding:0;}:focus{outline:0;}
-img,iframe{border:none;}
+{
+margin:0;
+padding:0;
+}
+img,iframe{
+border:none;
+}
 ol,ul,li
 {
 list-style:none;
@@ -13,10 +18,7 @@ table
 {
 border-collapse:collapse;border-spacing:0;
 }
-body
-{
- font:normal 12px/1.5 Arial,Tahoma,Helvetica,sans-serif;
-}
+
 a:link,a:visited
 {
 text-decoration:none;color:#000;
@@ -28,4 +30,11 @@ text-decoration:none;color:#000;
 .clear:after
 {
 content:".";display:block;height:0;clear:both;visibility:hidden;
+}
+.cutting{
+opacity:0.3;
+}
+.disabled{
+opacity:0.3;
+cursor:default!important;
 }

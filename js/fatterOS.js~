@@ -1806,7 +1806,7 @@
 			}
 			return str;
 		},
-/*
+
 		fixURL: function(str){	
 			var l = str.length;
 			if(str.substring(0,1) == "/"  ||  str.substring(0,1) == "\\"){
@@ -1832,7 +1832,7 @@
 			}
 			return str;
 		},
-*/
+
 		getClientTop: function(){
 					 
 	//		return 0;			 
