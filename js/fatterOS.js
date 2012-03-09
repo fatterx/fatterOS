@@ -5,12 +5,12 @@
  *	date		:	2011-12-30
  * */
 
-﻿$(document).ready(function(){
+$(document).ready(function(){
 
 	/*
 	 *声明命名空间
 	 * */
-	var fatterOS ={verson: "1.0"};
+	var fatterOS = {verson: "1.0"};
 
 	/*
 	 * 定义fatterOS.window构造函数
@@ -929,14 +929,13 @@
 							 
 			},
 
-			checkBackForwordButton: function(currentContent){
+			checkBackForwordButton: function(tag_id){
 
-				var hashList = currentContent.data("data").hashList,
-
-					hashNo = currentContent.data("data").hashNo;
+				var data = fatterOS.cache.tabs[tag_id],
+					hashList = data.hashList,
+					hashNo = data.hashNo;
 
 				this.elem_address.find("#back_button").attr("className","disabled");
-
 				this.elem_address.find("#forword_button").attr("className","disabled");
 
 				if(hashList.length>1){
@@ -998,7 +997,7 @@
 																e.stopPropagation();
 																self.elem_file_tree.find("li").removeClass("selected");
 																$(this).addClass("selected");
-																self.showFile("/"+encodeChinese(this.innerHTML),this.innerHTML);
+																self.showFile("/"+fatterOS.tools.encodeChinese(this.innerHTML),this.innerHTML);
 								});
 							});
 						}
@@ -1015,20 +1014,22 @@
 					$backBtn = self.elem_address.find("#back_button"),
 					$forwordBtn = self.elem_address.find("#forword_button"),
 					files_html = "",
+					tabs = fatterOS.cache.tabs,
 					hashNo = 0,
-					$tag,hashList;
+					hashList = [],
+					fileName = [],
+					$tag;
 				
-				hashList = new Array();
-				hashList[0] = url;
+	//			hashList[0] = url;
 				
 				$.ajax({
 						url:"file.php",
 						data:"path="+url,
 						dataType:"json",
 						success:function(data){
-							$.each(data,function(i){
-								
+							$.each(data,function(i){		
 								files_html += "<div class=\"docs-list\"><div class=\"file-"+data[i].type+"\"><img src=\"images/exe/"+data[i].type+".png\" alt=\"\" /><input type=\"text\" value="+data[i].name+" class=\"rename-text\" /></div></div>";
+								fileName.push(data[i].name);
 							});
 
 							if( target == "_blank" ){
@@ -1042,9 +1043,17 @@
 																			e.stopPropagation();
 																			self.closeTag(this.parentNode.id);
 																		});
-								$("<div id=\"content_"+cur_tag_id+"\" class=\"content-inner\">"+files_html+"</div>").appendTo(content_box)
-																													.data("data",{url:url,hashList:hashList,hashNo:hashNo});
+								$("<div id=\"content_"+cur_tag_id+"\" class=\"content-inner\">"+files_html+"</div>").appendTo(content_box);
+																	//												.data("data",{url:url,hashList:hashList,hashNo:hashNo});
+								hashList[0] = {
+												fileName: fileName,
+												url: url
+												};
 								
+								tabs[cur_tag_id] = {
+														hashList: hashList,
+														hashNo: hashNo,
+												   };
 								self.switchTag(cur_tag_id);
 								$backBtn.attr("className","disabled");
 								$forwordBtn.attr("className","disabled");
@@ -1056,30 +1065,45 @@
 							} else {
 								var cur_tag_li = self.target.find(".frame-current .tag-cur"),
 									cur_content = self.target.find(".frame-current .content-cur");
-								
-								hashList = cur_content.data("data").hashList;
-								hashNo = cur_content.data("data").hashNo;
+
+								cur_tag_id = cur_tag_li.attr("id");	
+								//hashList = cur_content.data("data").hashList;
+								//hashNo = cur_content.data("data").hashNo;
+
+								hashList = tabs[cur_tag_id].hashList;
+								hashNo = tabs[cur_tag_id].hashNo;
 
 								if( back == undefined ){
-
-									hashList[hashList.length] = url;
+									hashList[hashList.length] = {	fileName: fileName,
+																	url:url
+																};
 									hashNo = hashList.length - 1;
 								} else if( hashNo != (hashList.length - 1) ){  
 										 //删除此页标识编号以后的数组项
 										 //hashList.splice(hashNo+1,(hashList.length-(hashNo+1)));
 								}
-								cur_content.html(files_html).data("data",{url:url,hashList:hashList,hashNo:hashNo});
+								cur_content.html(files_html);//.data("data",{url:url,hashList:hashList,hashNo:hashNo});
+								
+								hashList[length-1] = {
+														fileName: fileName,
+														url: url
+													};
+								tabs[cur_tag_id] = {
+														hashList: hashList,
+														hashNo: hashNo,
+													};
+
 								cur_tag_li.children("a").html(title);
 								self.setAddress(url);
 								self.showState(target);
-								self.checkBackForwordButton(cur_content);
+								self.checkBackForwordButton(cur_tag_id);
 
 							}
 
 							self.target.find(".file-folder").bind("dblclick",function(e){
 									e.stopPropagation();
 									var cur_title = this.childNodes[1].value,
-										cur_url = url + "/" + encodeChinese(cur_title);
+										cur_url = url + "/" + fatterOS.tools.encodeChinese(cur_title);
 									self.showFile( cur_url, cur_title , "_self" );
 							});
 
@@ -1098,33 +1122,32 @@
 				address.val(decodeURI(decodeURI(url)));
 			},
 
-			//向前
-			goForword:function(currentContent){
-
-				var hashNo = currentContent.data("data").hashNo,
-					hashList = currentContent.data("data").hashList,
-					url = hashList[++hashNo];
+			//TODO fix负数 向前
+			goForword:function(tag_id){
+				var data = fatterOS.cache.tabs[tag_id],
+					hashList = data.hashList,
+					url = hashList[++(data.hashNo)].url;
 
 				if(url == null)return;
-				currentContent.data("data",{url:url,hashList:hashList,hashNo:hashNo});
+				//currentContent.data("data",{url:url,hashList:hashList,hashNo:hashNo});
 				this.showFile(url,this.getTagNameFromURL(url),"_self","back");
 
 			},
 			//向后
-			goBack:function(currentContent){
+			goBack:function(tag_id){
 
-				var hashNo = currentContent.data("data").hashNo,
-					hashList = currentContent.data("data").hashList,
-					url = hashList[--hashNo];
+				var data = fatterOS.cache.tabs[tag_id],
+					hashList = data.hashList,
+					url = hashList[--(data.hashNo)].url;
 
 				if(url == null)return;
-				currentContent.data("data",{url:url,hashList:hashList,hashNo:hashNo});
+
 				this.showFile(url,this.getTagNameFromURL(url),"_self","back");
 
 			},
 			//得到隐藏地址
 			getHideAddress:function(tag_id){
-				return this.target.find("#content_"+tag_id).data("data").url;
+				return fatterOS.cache.tabs[tag_id].hashList[0].url;
 			},
 			//状态栏显示
 			showState:function(tag_id){
@@ -1148,7 +1171,7 @@
 				tag_li_cur.addClass("tag-cur").css("display","block");
 				this.setAddress(address);
 				this.showState(tag_id);
-				this.checkBackForwordButton(content_cur);
+				this.checkBackForwordButton(tag_id);
 
 			},
 			//关闭标签
@@ -1179,7 +1202,7 @@
 					str=str.substring(0,l-1);
 				}
 				var url=str.split("/");
-				return decodeChinese(url[url.length-1]);
+				return fatterOS.tools.decodeChinese(url[url.length-1]);
 			},
 /*
 			getSelf:function(){
@@ -1372,14 +1395,14 @@
 
 				this.elem_address.find("#forword_button").bind("click",function(){
 					if(this.className == "disabled")return;
-					var currentContent = self.target.find(".frame-current .content-cur");
-					self.goForword(currentContent);
+					var currentTagId = self.target.find(".frame-current .tag-cur").attr("id");
+					self.goForword(currentTagId);
 				});
 
 				this.elem_address.find("#back_button").bind("click",function(){
 					if(this.className == "disabled")return;
-					var currentContent = self.target.find(".frame-current .content-cur");
-					self.goBack(currentContent);
+					var currentTagId = self.target.find(".frame-current .tag-cur").attr("id");
+					self.goBack(currentTagId);
 				});
 
 				this.target.find(".frame-current .tag-scroll-left").bind("click",function(){
@@ -1543,7 +1566,7 @@
 	fatterOS.cache = {
 		select: [],
 		clipBoard: [],
-		data: {}
+		tabs: {}
 	};
 
 	//实现全部的事件
@@ -1867,14 +1890,23 @@
 			return name.match(/^[^\\\/\<\>:]+$/);
 		},
 
-		isFileExist: function(){
-					 
+		isFileExist: function(name,tag_id){
+			var data = fatterOS.cache.tabs[tag_id],
+				hashList = data.hashList,
+				hashNo = data.hashNo,
+				filesName = hashList[hashNo].fileName;
+			for(var i in filesName){
+				if(name === filesName[i]){
+					return i;
+				}
+			}
+			return -1;
 		}
 	};
 
 	fatterOS.desktop.init();
 	fatterOS.tips("欢迎使用fatterOS!");
-
+	window.fatterOS = fatterOS;
 });
 
 function logout(){
