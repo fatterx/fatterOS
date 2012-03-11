@@ -629,9 +629,8 @@ $(document).ready(function(){
 			new fatterOS.window( options ).setAskMessage( msg, ["确定"], type, function(){} );
 		},
 
-		confirm: function( msg, callback_t, callback_f, options ){
+		confirm: function( msg, callback, options ){
 		
-			var callback_f = callback_f || function(){};
 			options = $.extend({ 
 								title:"注意",
 								resizable:false,
@@ -640,11 +639,11 @@ $(document).ready(function(){
 								modal:true
 								},options||{});
 			new fatterOS.window( options ).setAskMessage( msg, ["确定","取消"], "question", function(btn){
-					if( callback_t ){
+					if(typeof callback === "function"){
 						if( btn == "确定" )
-							callback_t();
+							callback(true);
 						else
-							callback_f();
+							callback(false);
 					}
 				});
 		},
@@ -1028,7 +1027,7 @@ $(document).ready(function(){
 						dataType:"json",
 						success:function(data){
 							$.each(data,function(i){		
-								files_html += "<div class=\"docs-list\"><div class=\"file-"+data[i].type+"\"><img src=\"images/exe/"+data[i].type+".png\" alt=\"\" /><input type=\"text\" value="+data[i].name+" class=\"rename-text\" /></div></div>";
+								files_html += "<div class=\"docs-list\"><div class=\"file-"+data[i].type+"\"><img src=\"images/ext/"+data[i].type+".png\" alt=\"\" /><input type=\"text\" value="+data[i].name+" class=\"rename-text\" /></div></div>";
 								fileName.push(data[i].name);
 							});
 
@@ -1183,11 +1182,15 @@ $(document).ready(function(){
 				if(prevLi.length !== 0  &&  !prevLi.hasClass("tag-scroll")){
 					li.remove();
 					content.remove();
+					window.fatterOS.cache.tabs[tag_id] = null;
+					delete window.fatterOS.cache.tabs[tag_id];
 					this.checkFrameScroll();
 					this.switchTag(prevLi.attr("id"));
 				} else if(nextLi.length !== 0){
 					li.remove();
 					content.remove();
+					window.fatterOS.cache.tabs[tag_id] = null;
+					delete window.fatterOS.cache.tabs[tag_id];
 					this.checkFrameScroll();
 					this.switchTag(nextLi.attr("id"));
 				} else {
@@ -1504,8 +1507,12 @@ $(document).ready(function(){
 
 		rm: function(){
 			var targets = $(".content-cur .selected");
-			$.each(targets,function(i){
-				$(targets[i]).remove();
+			fatterOS.confirm("确定删除这"+targets.length+"项吗？",function(value){
+				if(value){
+					$.each(targets,function(i){
+						$(targets[i]).remove();
+					})
+				}
 			})
 		},
 
@@ -1523,16 +1530,65 @@ $(document).ready(function(){
 		},
 
 		mkdir: function(){
-			var place = $(".content-cur"),
-				html = "<div class=\"docs-list\"><div class=\"file-folder\"><img alt=\"\" src=\"images/exe/folder.png\"/><input type=\"text\" value=\"新建文件夹\" /></div></div>";
+			var tag_id = $(".frame-current .tag-cur").attr("id"),
+				content_id = "content_" + tag_id,
+				place = $("#"+content_id),
+				name = '新建文件夹',
+				fileName = this.uniqueName(name,"",tag_id),		
+				html = "<div class=\"docs-list\"><div class=\"file-text\"><img alt=\"\" src=\"images/ext/folder.png\"/><input type=\"text\" value="+fileName+" /></div></div>",
+				data = fatterOS.cache.tabs[tag_id],
+				hashList = data.hashList,
+				hashNo = data.hashNo;
 			place.append(html);
+			hashList[hashNo].fileName.push(fileName);
 		},
 
 		mkfile: function(){
-			var place = $(".content-cur"),
-				html = "<div class=\"docs-list\"><div class=\"file-text\"><img alt=\"\" src=\"images/exe/txt.png\"/><input type=\"text\" value=\"新建文本\" /></div></div>";
+			var tag_id = $(".frame-current .tag-cur").attr("id"),
+				content_id = "content_" + tag_id,
+				place = $("#"+content_id),
+				name = '新建文本',
+				ext = '.txt',
+				fileName = this.uniqueName(name,ext,tag_id),		
+				html = "<div class=\"docs-list\"><div class=\"file-text\"><img alt=\"\" src=\"images/ext/txt.png\"/><input type=\"text\" value="+fileName+" /></div></div>",
+				data = fatterOS.cache.tabs[tag_id],
+				hashList = data.hashList,
+				hashNo = data.hashNo;
 			place.append(html);
+			hashList[hashNo].fileName.push(fileName);
 	
+		},
+	
+		isValidName: function(name){
+			return name.match(/^[^\\\/\<\>:]+$/);
+		},
+
+		isFileExist: function(name,tag_id){
+			var data = fatterOS.cache.tabs[tag_id],
+				hashList = data.hashList,
+				hashNo = data.hashNo,
+				filesName = hashList[hashNo].fileName;
+			for(var i in filesName){
+				if(name === filesName[i]){
+					return i;
+				}
+			}
+			return -1;
+		},
+
+		uniqueName: function(name,ext,tag_id){
+			var i = 0;
+			if(this.isFileExist(name+ext,tag_id) < 0){
+				return name+ext;
+			}
+
+			while(++i < 50){
+				if(this.isFileExist(name+i+ext,tag_id) < 0){
+					return name+i+ext;
+				}
+			}
+
+			return name+Math.random()+ext;
 		},
 
 		upload: function(){
@@ -1886,22 +1942,6 @@ $(document).ready(function(){
 					}
 		},
 		
-		isValidName: function(name){
-			return name.match(/^[^\\\/\<\>:]+$/);
-		},
-
-		isFileExist: function(name,tag_id){
-			var data = fatterOS.cache.tabs[tag_id],
-				hashList = data.hashList,
-				hashNo = data.hashNo,
-				filesName = hashList[hashNo].fileName;
-			for(var i in filesName){
-				if(name === filesName[i]){
-					return i;
-				}
-			}
-			return -1;
-		}
 	};
 
 	fatterOS.desktop.init();
