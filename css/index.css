@@ -473,6 +473,7 @@ background-color: #D2E5FA;
 
 #fatterOS_context div.split{
 border-bottom: 1px solid  #DDDDDD;
+height:0px;
 }
 
 /*resize-helper*/

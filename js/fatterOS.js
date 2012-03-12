@@ -1079,7 +1079,7 @@ $(document).ready(function(){
 									hashNo = hashList.length - 1;
 								} else if( hashNo != (hashList.length - 1) ){  
 										 //删除此页标识编号以后的数组项
-										 //hashList.splice(hashNo+1,(hashList.length-(hashNo+1)));
+										 hashList.splice(hashNo+1,(hashList.length-(hashNo+1)));
 								}
 								cur_content.html(files_html);//.data("data",{url:url,hashList:hashList,hashNo:hashNo});
 								
@@ -1133,7 +1133,7 @@ $(document).ready(function(){
 
 			},
 			//向后
-			goBack:function(tag_id){
+			goBack: function(tag_id){
 
 				var data = fatterOS.cache.tabs[tag_id],
 					hashList = data.hashList,
@@ -1145,11 +1145,11 @@ $(document).ready(function(){
 
 			},
 			//得到隐藏地址
-			getHideAddress:function(tag_id){
+			getHideAddress: function(tag_id){
 				return fatterOS.cache.tabs[tag_id].hashList[0].url;
 			},
 			//状态栏显示
-			showState:function(tag_id){
+			showState: function(tag_id){
 				var source = $("#content_"+tag_id+">div.docs-list"),
 					state = $(".state-bar>span"),
 					s = "";
@@ -1157,7 +1157,7 @@ $(document).ready(function(){
 				state.html(s);	
 			},
 			//切换标签
-			switchTag:function(tag_id){
+			switchTag: function(tag_id){
 				var content_cur = this.target.find("#content_"+tag_id),
 					tag_li_cur = this.target.find("#"+tag_id),
 					contents = this.target.find(".frame-current .content-inner"),
@@ -1174,7 +1174,7 @@ $(document).ready(function(){
 
 			},
 			//关闭标签
-			closeTag:function(tag_id){
+			closeTag: function(tag_id){
 				var li = this.target.find("#"+tag_id),
 					content = this.target.find("#content_"+tag_id),
 					prevLi = li.prev("li"),
@@ -1212,24 +1212,36 @@ $(document).ready(function(){
 				return this.target;
 			},
 */
-			selectTarget : function(target){
-				$(target).addClass("selected");
-				this.updateShortcutButton(target);
+			selectTarget : function($target){
+				var name = $target.find("input").val();
+
+				$target.addClass("selected");
+				fatterOS.cache.select.push(name);
+				this.updateShortcutButton($target);
 			},
 
-			selectAllTarget : function(){
-				this.target.find(".frame-current .content-cur div.docs-list").addClass("selected");
+			selectAllTarget: function(){
+				var $targets = this.target.find(".frame-current .content-cur div.docs-list");
+				
+				$targets.addClass("selected");
+				$.each($targets,function(i){
+					var name = $(targetWidth[i]).find("input").val();
+					fatterOS.cache.select.push(name);
+				})
 				this.updateShortcutButton('target');
 			},
 
-			unSelectTarget : function(target){
-				target.removeClass("selected");
+			unSelectTarget: function($target){
+				var name = $target.find("input").val();
+				
+				$target.removeClass("selected");
+				fatterOS.cache.select.pop();
 				this.updateShortcutButton();
-
 			},
 
-			unSelectAllTarget : function(){
+			unSelectAllTarget: function(){
 				this.target.find(".frame-current .content-cur div.docs-list").removeClass("selected");
+				fatterOS.cache.select = [];
 				this.updateShortcutButton();
 			},
 /*
@@ -1279,13 +1291,15 @@ $(document).ready(function(){
 				
 				function selectBind(){
 					filemgrContentBox.bind("mousedown.drag_select",function(e){
+						e.preventDefault();
+					//	e.stopPropagation();
 						target = $(e.target).parents(".docs-list");
 						if( target.length != 0 ){  //选中文件
 							//如果没有按住shift or ctrl键
 							if( !e.shiftKey && !e.ctrlKey ){
-						//		if( e.button != "2" ){
+								if( e.button != "2" ){
 									self.unSelectAllTarget();
-						//		}
+								}
 								self.selectTarget(target);
 							} else {
 								target.toggleClass("selected");
@@ -1300,6 +1314,8 @@ $(document).ready(function(){
 					});
 
 					$(document).bind("mousemove.drag_select",function(e){
+						e.stopPropagation();
+						e.preventDefault();
 						onSelect(e);
 					});
 
@@ -1337,16 +1353,21 @@ $(document).ready(function(){
 						selectDiv.css({"left":left,"top":top,"width":width,"height":height});
 						selectDiv.show();
 
-						var targets = self.target.find(".content-cur .docs-list");
+						var targets = self.target.find(".content-cur .docs-list"),
+							length = targets.length;
 
-						if( targets.length != 0 ){
-							$.each(targets,function(i){
+						if( length != 0 ){
+							for( var i = 0; i < length; ++i ){
 								if(isInnerRegion(selectDiv,$(targets[i]))){
-									self.selectTarget($(targets[i]));
+									if(!$(targets[i]).hasClass("selected")){
+										self.selectTarget($(targets[i]));
+									}
 								} else {
-									self.unSelectTarget($(targets[i]));
+									if($(targets[i]).hasClass("selected")){
+										self.unSelectTarget($(targets[i]));
+									}
 								}
-							});
+							}
 						}
 					}
 				}
@@ -1451,55 +1472,73 @@ $(document).ready(function(){
 
 	
 	fatterOS.system = {
-		contextmenu: function(place,e){
+		contextmenu: function(place,srcE){
 								var content = {
 										default:["刷新","粘贴","|","新建文件夹","新建文本","|","属性"],
 										desktop:["打开应用","卸载应用"],
-										filemgr:["刷新","粘贴","|","上传","新建[...]","|","全选","对齐","查看方式","|","属性"],
-										target :["下载","复制","删除","改名","|","属性"],
+										filemgr:["刷新","粘贴","|","上传","全选","|","属性"],
+										target :["下载","复制","删除","改名","|","属性"]
+									},
+									content_cmd = {
+										default:["reload","paste","|","mkdir","mkfile","|","info"],
+										desktop:["runApp","removeApp"],
+										filemgr:["reload","paste","|","upload","selectAll","info"],
+										target:["download","copy","rm","rename","|","info"]
 									},
 									clientWidth  = fatterOS.clientInfo.clientWidth(),
 									clientHeight = fatterOS.clientInfo.clientHeight(),
-									context = eval("content."+place),
+									context = content[place],
+									cmd = content_cmd[place],
 									html = "",
 									split = "<div class=\"split\"></div>",
 									offsetX = 10,
 									offsetY = 10,
 									x = 0,
-									y = 0;
+									y = 0,
+									self= this;
 
 								this.$context = $("#fatterOS_context");
 								for(var i = 0; i != context.length; ++i){
 									if(context[i] === "|")
 										html += split;
 									else
-										html += "<li>"+context[i]+"</li>";
+										html += "<li name=\""+cmd[i]+"\">"+context[i]+"</li>";
 								}
-								this.$context.html("<ul class=\"fatterOS-contextmenu\">"+html+"</ul>");
-								if( e.pageX + offsetX + this.$context.width() > clientWidth )
+								$("<ul class=\"fatterOS-contextmenu\" />").append($(html).bind("mousedown",function(e){
+																			e.stopPropagation();
+																			var cmd = $(this).attr("name");
+																			self[cmd] && self[cmd](srcE);
+																			//fatterOS.desktop[cmd] && fatterOS.desktop[cmd]();
+																			self.$context.empty();
+																			}))
+											.appendTo(this.$context);
+								
+								if( srcE.pageX + offsetX + this.$context.width() > clientWidth )
 									x = clientWidth - this.$context.width() - offsetX;
 								else
-									x = e.pageX + offsetX;
+									x = srcE.pageX + offsetX;
 								//TODO y-->200
-								if( e.pageY + offsetY + 200 > clientHeight )
+								if( srcE.pageY + offsetY + 200 > clientHeight )
 									y = clientHeight - 200 - offsetY;
 								else
-									y = e.pageY + offsetY;
+									y = srcE.pageY + offsetY;
 								this.$context.css({left:x,top:y}).show();
 								this.$context.hover(function(){},function(){
 									fatterOS.system.$context.empty();		
 								});
 							},
-		select			:	function(){
-							
-							},
+		//TODO this !!!
+		select:	function(){
+									
+		},
 
-		selectAll		:	function(){
+		selectAll: function(){
 							
 							},
 
 		copy: function(){
 			var targets = $(".content-cur .selected");
+		//	var targets = fatterOS.cache.select;
 			$.each(targets,function(i){
 				fatterOS.cache.clipBoard.push(targets[i]);
 			});
@@ -1507,6 +1546,7 @@ $(document).ready(function(){
 
 		rm: function(){
 			var targets = $(".content-cur .selected");
+			//var targets = fatterOS.cache.select;
 			fatterOS.confirm("确定删除这"+targets.length+"项吗？",function(value){
 				if(value){
 					$.each(targets,function(i){
@@ -1602,6 +1642,11 @@ $(document).ready(function(){
 		logoff:	function(){
 							
 		},
+
+		runApp: function(srcE){
+			fatterOS.desktop.openApp(srcE);	
+		},	
+
 	};
 
 	fatterOS.clientInfo = {
@@ -1621,24 +1666,25 @@ $(document).ready(function(){
 
 	fatterOS.cache = {
 		select: [],
-		clipBoard: [],
+		clipBoard:[],
 		tabs: {}
 	};
 
 	//实现全部的事件
 	fatterOS.eventBind   = fatterOS.eventBind || {};
 	fatterOS.eventBind = {
-		windowBind		:	function(){
+		windowBind:	function(){
 								$(window).resize(function(){
 									
 								});	
 							},
 
-		documentBind	:	function(){
+		documentBind: function(){
 								this.$document = $(document);
 								this.$context = fatterOS.system.$context || $("#fatterOS_context");
 								/*全局点击事件开始*/
 								this.$document.bind("mousedown.globle",function(e){
+									e.preventDefault();
 									fatterOS.eventBind.$startMenu.hide();
 									fatterOS.eventBind.$context.empty();
 									if ( !$(e.target).is('input,textarea,select') ) {
@@ -1650,6 +1696,7 @@ $(document).ready(function(){
 								/*全局右键事件开始*/
 								this.$document.bind("contextmenu.globle",function(e){
 									e.preventDefault();
+									e.stopPropagation();
 									fatterOS.system.contextmenu("default",e);
 								});
 								/*全局右键事件结束*/
@@ -1684,7 +1731,10 @@ $(document).ready(function(){
 						
 								/*桌面程序单击开始*/
 								this.$desktop.bind("click.openApp",function(e){
+									e.preventDefault();
+									fatterOS.desktop.openApp(e);
 									//TODO 事件代理
+									/*
 									var target;
 									if(e.target.className === "app-button")
 										target = e.target;
@@ -1697,7 +1747,7 @@ $(document).ready(function(){
 
 									if(target){
 										fatterOS.desktop.openApp(target.dataset.name,target.dataset.type);
-									}
+									}*/
 
 								});
 								/*桌面程序单击结束*/
@@ -1762,77 +1812,97 @@ $(document).ready(function(){
 	 */
 	fatterOS.desktop = {
 	//TODO	move those to system.prestart;
-		preload		:	function(){
-								var $startingContainer 	= 	$("#starting_container"),
-									$startingBar		=	$("#starting_bar"),
-									clientHeight  = fatterOS.clientInfo.clientHeight(),
-									clientWidth   = fatterOS.clientInfo.clientWidth();
+		preload: function(){
+			var $startingContainer 	= 	$("#starting_container"),
+				$startingBar		=	$("#starting_bar"),
+				clientHeight  = fatterOS.clientInfo.clientHeight(),
+				clientWidth   = fatterOS.clientInfo.clientWidth();
 
-								$startingBar.progressBar(100,{speed:25,callback:function(data){
-									if( data.running_value == data.value ){
-										$startingContainer.fadeOut("slow");
-									}
-								}});
-								return this;
-							},
+			$startingBar.progressBar(100,{speed:25,callback:function(data){
+				if( data.running_value == data.value ){
+					$startingContainer.fadeOut("slow");
+				}
+			}});
+			return this;
+		},
+		
 		init: function(){
-								var $cloud = $(".scene-cloud"),
-									cloud_x = -500,
-									clientWidth  = fatterOS.clientInfo.clientWidth(),
-									clientHeight = fatterOS.clientInfo.clientHeight();
-								
-								this.preload();
-								this.creatTaskbarTime();
+			var $cloud = $(".scene-cloud"),
+				cloud_x = -500,
+				clientWidth  = fatterOS.clientInfo.clientWidth(),
+				clientHeight = fatterOS.clientInfo.clientHeight();
+			
+			this.preload();
+			this.creatTaskbarTime();
 
-								setInterval(function(){
-									$cloud.css("left",cloud_x);
-									cloud_x += 0.1;
-									if( cloud_x > clientWidth )
-										cloud_x = -500;
-								},100);
+			setInterval(function(){
+				$cloud.css("left",cloud_x);
+				cloud_x += 0.1;
+				if( cloud_x > clientWidth )
+					cloud_x = -500;
+			},100);
 
-								document.body.style.width 	= clientWidth + "px";
-								document.body.style.height  = clientHeight + "px";
-								fatterOS.eventBind.startButtonBind();
-								fatterOS.eventBind.documentBind().desktopBind().showDesktopBind();
-								return this;
-							},
-		creatTaskbarTime:	function(){
-									var $timebar = $("#timebar");
-									setInterval(function(){
-											$timebar.html(fatterOS.tools.getDate(4));
-											},1000);
-									return this;
-							},
-		changeBackgroud	:	function(imgsrc){
-								document.body.style.backgroundImage = "url(" + imgsrc + ")";
-								return	this;
-							},
-		changeTheme		:	function(themeType){
-								//TODO
-								return this;
-							},
-		openApp			:	function(name,type){
-							//var options = options ||;
-								if(type === undefined)
-									new fatterOS.window({title:name,onClose:function(){
-											fatterOS.alert(name+"--成功关闭了!")
-										}});
-								else if(type === "filemgr")
-										new fatterOS.filemgr({title:name,onClose:function(){
-											fatterOS.alert("资源管理器已关闭！")	
-										}});
-									else if(type === "widget")
-										new fatterOS.widget();
-							},
-		/**
-		 *	@param	{String} name app's name
-		 *	@return	{Object} this fatterOS.window;
-		 * */
-		removeApp		:	function(name){
-				  //	$().remove();
-							},
+			document.body.style.width 	= clientWidth + "px";
+			document.body.style.height  = clientHeight + "px";
+			fatterOS.eventBind.startButtonBind();
+			fatterOS.eventBind.documentBind().desktopBind().showDesktopBind();
+			return this;
+		},
 
+		creatTaskbarTime: function(){
+			var $timebar = $("#timebar");
+			setInterval(function(){
+					$timebar.html(fatterOS.tools.getDate(4));
+					},1000);
+			return this;
+		},
+
+		changeBackgroud: function(imgsrc){
+			document.body.style.backgroundImage = "url(" + imgsrc + ")";
+			return	this;
+		},
+		
+		changeTheme: function(themeType){
+			//TODO
+			return this;
+		},
+	
+		openApp: function(e){
+			//TODO 事件代理
+			var target,name,type;
+			if(e.target.className === "app-button")
+				target = e.target;
+			else
+				if(e.target.parentNode.className === "app-button")
+					target = e.target.parentNode;
+				else
+					if(e.target.parentNode.parentNode.className === "app-button")
+						target = e.target.parentNode.parentNode;
+
+			if(target){
+				name = target.dataset.name;
+				type = target.dataset.type;
+				
+				if(type === undefined)
+					new fatterOS.window({title:name,onClose:function(){
+							fatterOS.alert(name+"--成功关闭了!")
+						}});
+				else if(type === "filemgr")
+						new fatterOS.filemgr({title:name,onClose:function(){
+							fatterOS.alert("资源管理器已关闭！")	
+						}});
+				else if(type === "widget")
+					new fatterOS.widget();
+				else if(type === "douban"){
+					fatterOS.iframe("http://douban.fm/partner/qq_plus",{title:"豆瓣FM",width:"550"})
+				}
+
+			}
+		},
+		
+		removeApp: function(e){
+		
+		}
 	};
 
 
