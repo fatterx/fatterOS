@@ -27,8 +27,8 @@ $(document).ready(function(){
 	 * @config	{Number}	[height]	窗口高度，默认400px
 	 * @config	{Number}	[minWidth]	窗口最小宽度，默认300px
 	 * @config	{Number}	[minHeight]	窗口最小高度，默认200px
-	 * @config	{Function}	[resizeCallback]	窗口改变大小后的回调函数，默认null
 	 * @config	{Boolean}	[hasBound]	窗口移动时是否有边界限制，默认false
+	 * @config	{Function}	[onClose]	窗口关闭时触发事件，默认为null
 	 */
 
 	fatterOS.window = function(options) {
@@ -46,7 +46,6 @@ $(document).ready(function(){
 			minWidth	:	300,
 			minHeight	: 	200,
 			hashBound	:	false,
-			ResizeCallback:	null,
 			onClose		:	null
 		};
 
@@ -74,10 +73,13 @@ $(document).ready(function(){
 		this.resizeHelper = $("div.fwindow-resize-helper");
 		//是否最大化，状态
 		this.maxed = false;
+		
 		//定义fwindow的padding宽度
 		this.paddingWidth = this.getSize().outerWidth-this.getSize().width;
 		//定义fwindow的padding高度
 		this.paddingHeight = this.getSize().outerHeight-this.getSize().height;
+		
+		this.resizeCallback = null;
 		this.init();	
 	}
 
@@ -269,7 +271,7 @@ $(document).ready(function(){
 
 			return this;
 		},
-		
+	//TODO filemgr resize callback!!!
 		resize: function( width, height, callback, args ) {
 			var fixedWidth  = width  - this.paddingWidth,
 				fixedHeight = height - this.paddingHeight;
@@ -283,6 +285,9 @@ $(document).ready(function(){
 
 			if( callback !== null && typeof callback === "function" )
 				callback(args);
+
+			if(this.resizeCallback !== null && typeof this.resizeCallback === "function")
+				this.resizeCallback();
 
 			return this;
 		},
@@ -436,16 +441,14 @@ $(document).ready(function(){
 		},
 
 		resizeBind:	function(){
-		
 			var self = this;
+			
 			this.fwindow_resize.find("div").bind("mousedown.fw_resize",function(e){
-		
 					e.preventDefault();
 					e.stopPropagation();
 					self.toTop();
 					self.resize_handler_class=this.className;
 					onBeforeResize(e);
-		
 			});
 
 			$(document).bind("mousemove.fw_resize",function(e){
@@ -676,7 +679,7 @@ $(document).ready(function(){
 		},
 
 		iframe: function( url, options ) {
-			var wrap = "<div class=\"fwindow-iframe\"><iframe src=" + url + " border=0 width=100% height=100% overflow=auto /></div>";
+			var wrap = "<div class=\"fwindow-grid\"><iframe src=" + url + " border=0 width=100% height=100% overflow=auto /></div>";
 				options = $.extend({width:600,height:400},options||{});
 				new fatterOS.window( options ).setContent( wrap );	
 		}
@@ -707,10 +710,10 @@ $(document).ready(function(){
 								'file'  : ['select', 'open', 'quicklook', 'split', 'copy', 'cut', 'rm', 'split', 'duplicate', 'rename', 'edit', 'resize', 'archive', 'extract', 'split', 'info'],
 								'group' : ['select', 'copy', 'cut', 'rm', 'split', 'archive', 'extract', 'split', 'info']
 							},
-			resizeCallback:	function(){
-										this.adjustWindow();
-										this.checkFrameScroll();
-							},
+			/*resizeCallback:	function(){
+										//self.adjustWindow();
+									//	self.checkFrameScroll();
+							},*/
 		};
 
 		this.options = $.extend({}, this.defaults, options || {});
@@ -723,7 +726,7 @@ $(document).ready(function(){
 		this.$filemgr_resize = $("<div class=\"filemgr-resize\" />");
 		this.$filemgr_content_box = $("<div class=\"filemgr-content-box\" />");
 		this.$status_bar = $("<div class=\"filemgr-status-bar\" />");
-		this.$filemgr_content_wrap = $("<div class=\"filemgr-content-wrap frame-current\" />")
+		this.$filemgr_content_wrap = $("<div class=\"filemgr-content-wrap grid-current\" />")
 								.append(this.$filemgr_tag)
 								.append(this.$filemgr_content_box);
 		this.target = $("<div class=\"filemgr-wrap\" />")
@@ -744,8 +747,12 @@ $(document).ready(function(){
 			constructor: fatterOS.filemgr,
 
 			init: function(){
-
+				var self = this;
 				this.window.resize(this.options.width,this.options.height);
+				this.window.resizeCallback = function(){
+					self.adjustWindow();
+					self.checkFrameScroll();
+				}
 
 				var tools = this.options.toolbar,
 					lengths = tools.length,
@@ -790,17 +797,17 @@ $(document).ready(function(){
 
 				var self = this,
 					left_nav_tree = self.$left_nav_tree,
-					left_frame = self.$filemgr_content_wrap;
+					leftgrid = self.$filemgr_content_wrap;
 
-				( function( self ){
+				(function( self ){
 
-					resizeHandle.bind("mousedown.frame_resize",function(e){
+					resizeHandle.bind("mousedowngrid_resize",function(e){
 						e.preventDefault();
 						e.stopPropagation();
 						onBeforeResize(e);
 					});
 
-					$(document).bind("mousemove.frame_resize",function(e){
+					$(document).bind("mousemovegrid_resize",function(e){
 						e.preventDefault(); 
 						if( self.onResizeLeftSide ){
 								onResizeLeft(e);
@@ -809,7 +816,7 @@ $(document).ready(function(){
 						}
 					});
 
-					$(document).bind("mouseup.frame_resize",function(e){
+					$(document).bind("mouseupgrid_resize",function(e){
 						onResizeEnd();
 					});
 
@@ -829,11 +836,11 @@ $(document).ready(function(){
 							var l_width = Math.max( Math.min( e.pageX - self.target.offset().left,300 ), 100 );
 							left_nav_tree.css("width",l_width);
 
-							if( self.target.find(".right-frame").html() ){
-								var right_frame = self.target.find(".right-frame"),
+							if( self.target.find(".rightgrid").html() ){
+								var rightgrid = self.target.find(".rightgrid"),
 									r_width = (self.target.parent().width()-l_width)/2 - 7;
-								left_frame.css("width",r_width);
-								right_frame.css("width",r_width);
+								leftgrid.css("width",r_width);
+								rightgrid.css("width",r_width);
 							}
 						}
 
@@ -844,11 +851,11 @@ $(document).ready(function(){
 						if(self.isResize){
 
 								var left_width  = left_nav_tree.width();
-								var right_frame = self.target.find(".right-frame");
-								var right_totol = right_frame.width() + left_frame.width();
+								var rightgrid = self.target.find(".rightgrid");
+								var right_totol = rightgrid.width() + leftgrid.width();
 								var _width = Math.max( Math.min( e.pageX - self.target.offset().left - left_width, 500 ), 150 );
-								left_frame.css("width",_width);
-								right_frame.css("width",right_totol - _width);
+								leftgrid.css("width",_width);
+								rightgrid.css("width",right_totol - _width);
 						}
 
 					}
@@ -856,7 +863,7 @@ $(document).ready(function(){
 					function onResizeEnd(){
 
 						if(self.isResize){
-							if(self.options.resizeCallback)
+						//	if(self.options.resizeCallback)
 								//self.options.resizeCallback();
 								self.isResize = false;
 						}
@@ -874,7 +881,7 @@ $(document).ready(function(){
 					contentWrapHeight = curHeight - this.$address.height() - this.$shortcut_button.height() - this.$status_bar.height() - windowTitle,
 					contentWrapWidth = 0,
 					contentBoxHeight = contentWrapHeight - this.$filemgr_tag.height();
-					if( this.target.data("twice") === true ){
+					if( this.target.data("dbgrid") === true ){
 					
 						contentWrapWidth=(curWidth-this.$left_nav_tree.width())/2-6;  //减去padding 5，左边导航 双显
 						this.target.find(".filemgr-content-wrap").css({"width":contentWrapWidth,"float":"left"});
@@ -932,13 +939,13 @@ $(document).ready(function(){
 			},
 
 			checkFrameScroll: function(){
-				var currentFrame = this.target.find(".frame-current>.filemgr-tag"),
+				var currentFrame = this.target.find(".grid-current>.filemgr-tag"),
 					tags = currentFrame.find("ul.tag>li"),
 					tagWidth = tags.outerWidth(),
 					tagsWidth = tags.length * tagWidth,
-					frameWidth = currentFrame.width(),
-					scroll = this.target.find(".frame-current .tag-scroll");
-					if( tagsWidth > frameWidth ){
+				gridWidth = currentFrame.width(),
+					scroll = this.target.find(".grid-current .tag-scroll");
+					if( tagsWidth >gridWidth ){
 						scroll.show();
 						return true;
 					}
@@ -950,7 +957,7 @@ $(document).ready(function(){
 
 			scrollTags: function( direction ){
 
-				var ul = this.target.find(".frame-current ul.tag"),
+				var ul = this.target.find(".grid-current ul.tag"),
 					tagWidth = parseFloat(ul.find("li").outerWidth()) + parseFloat(ul.find("li").css("marginLeft")),
 					left = parseFloat(ul.css("left"));
 				direction < 0 ? left += tagWidth : left -= tagWidth;
@@ -985,8 +992,8 @@ $(document).ready(function(){
 			//显示文件
 			showFile: function(url,title,target,back){
 				var self = this,
-					content_box = self.target.find(".frame-current>.filemgr-content-box"),
-					tag_ul = self.target.find(".frame-current ul.tag"),
+					content_box = self.target.find(".grid-current>.filemgr-content-box"),
+					tag_ul = self.target.find(".grid-current ul.tag"),
 					target = target || "_blank",
 					cur_tag_id = "tag_li_" + fatterOS.filemgr.id,
 					$backBtn = self.$address.find("#back_button"),
@@ -998,15 +1005,13 @@ $(document).ready(function(){
 					fileName = [],
 					$tag;
 				
-	//			hashList[0] = url;
-				
 				$.ajax({
 						url:"file.php",
 						data:"path="+url,
 						dataType:"json",
 						success:function(data){
 							$.each(data,function(i){		
-								files_html += "<div data-name="+data[i].name+" class=\"docs-list\"><div class=\"file-"+data[i].type+"\"><img src=\"images/ext/"+data[i].type+".png\" alt=\"\" /><input type=\"text\" value="+data[i].name+" class=\"rename-text\" /></div></div>";
+								files_html += "<div data-name="+data[i].name+" data-key="+data[i].key+" class=\"docs-list\"><div class=\"file-"+data[i].type+"\"><img src=\"images/ext/"+data[i].type+".png\" alt=\"\" /><span class=\"filename\">"+data[i].name+"</span><input type=\"text\" value="+data[i].name+" class=\"rename-text\" /></div></div>";
 								fileName.push(data[i].name);
 							});
 
@@ -1022,7 +1027,7 @@ $(document).ready(function(){
 																			self.closeTag(this.parentNode.id);
 																		});
 								$("<div id=\"content_"+cur_tag_id+"\" class=\"content-inner\">"+files_html+"</div>").appendTo(content_box);
-																	//												.data("data",{url:url,hashList:hashList,hashNo:hashNo});
+								
 								hashList[0] = {
 												fileName: fileName,
 												url: url
@@ -1041,31 +1046,25 @@ $(document).ready(function(){
 								};
 
 							} else {
-								var cur_tag_li = self.target.find(".frame-current .tag-current"),
-									cur_content = self.target.find(".frame-current .content-current");
+								var cur_tag_li = self.target.find(".grid-current .tag-current"),
+									cur_content = self.target.find(".grid-current .content-current");
 
 								cur_tag_id = cur_tag_li.attr("id");	
-								//hashList = cur_content.data("data").hashList;
-								//hashNo = cur_content.data("data").hashNo;
-
 								hashList = tabs[cur_tag_id].hashList;
 								hashNo = tabs[cur_tag_id].hashNo;
 
 								if( back == undefined ){
+									console.log(hashList.length)
 									hashList[hashList.length] = {	fileName: fileName,
-																	url:url
+																	url: url
 																};
 									hashNo = hashList.length - 1;
 								} else if( hashNo != (hashList.length - 1) ){  
-										 //删除此页标识编号以后的数组项
-										 hashList.splice(hashNo+1,(hashList.length-(hashNo+1)));
+									//删除此页标识编号以后的数组项
+									hashList.splice(hashNo+1,(hashList.length-(hashNo+1)));
 								}
-								cur_content.html(files_html);//.data("data",{url:url,hashList:hashList,hashNo:hashNo});
+								cur_content.html(files_html);
 								
-								hashList[length-1] = {
-														fileName: fileName,
-														url: url
-													};
 								tabs[cur_tag_id] = {
 														hashList: hashList,
 														hashNo: hashNo,
@@ -1080,7 +1079,7 @@ $(document).ready(function(){
 
 							self.target.find(".file-folder").bind("dblclick",function(e){
 									e.stopPropagation();
-									var cur_title = this.childNodes[1].value,
+									var cur_title = this.childNodes[2].value,
 										cur_url = url + "/" + fatterOS.tools.encodeChinese(cur_title);
 									self.showFile( cur_url, cur_title , "_self" );
 							});
@@ -1100,14 +1099,13 @@ $(document).ready(function(){
 				address.val(decodeURI(decodeURI(url)));
 			},
 
-			//TODO fix负数 向前
 			goForword:function(tag_id){
 				var data = fatterOS.cache.tabs[tag_id],
 					hashList = data.hashList,
 					url = hashList[++(data.hashNo)].url;
 
 				if(url == null)return;
-				//currentContent.data("data",{url:url,hashList:hashList,hashNo:hashNo});
+				
 				this.showFile(url,this.getTagNameFromURL(url),"_self","back");
 
 			},
@@ -1139,8 +1137,8 @@ $(document).ready(function(){
 			switchTag: function(tag_id){
 				var content_cur = this.target.find("#content_"+tag_id),
 					tag_li_cur = this.target.find("#"+tag_id),
-					contents = this.target.find(".frame-current .content-inner"),
-					tags_lis = this.target.find(".frame-current ul.tag>li"),
+					contents = this.target.find(".grid-current .content-inner"),
+					tags_lis = this.target.find(".grid-current ul.tag>li"),
 					address = this.getHideAddress(tag_id);
 
 				tags_lis.removeClass("tag-current");
@@ -1188,26 +1186,29 @@ $(document).ready(function(){
 			},
 			
 			selectTarget : function($target){
-				var name = $target.find("input").val();
+			//	var name = $target.find("input").val();
+				var key = $target.attr("data-key");
 
 				$target.addClass("selected");
-				fatterOS.cache.select.push(name);
+				fatterOS.cache.select.push(key);
 				this.updateShortcutButton($target);
 			},
 
 			selectAllTarget: function(){
-				var $targets = this.target.find(".frame-current .content-current div.docs-list");
+				var $targets = this.target.find(".grid-current .content-current div.docs-list");
 				
 				$targets.addClass("selected");
 				$.each($targets,function(i){
-					var name = $(targetWidth[i]).find("input").val();
-					fatterOS.cache.select.push(name);
+					//var name = $(targetWidth[i]).find("input").val();
+					var key = $(target[i]).attr("data-key");
+
+					fatterOS.cache.select.push(key);
 				})
 				this.updateShortcutButton('target');
 			},
 
 			unSelectTarget: function($target){
-				var name = $target.find("input").val();
+				//var name = $target.find("input").val();
 				
 				$target.removeClass("selected");
 				fatterOS.cache.select.pop();
@@ -1215,25 +1216,25 @@ $(document).ready(function(){
 			},
 
 			unSelectAllTarget: function(){
-				this.target.find(".frame-current .content-current div.docs-list").removeClass("selected");
+				this.target.find(".grid-current .content-current div.docs-list").removeClass("selected");
 				fatterOS.cache.select = [];
 				this.updateShortcutButton();
 			},
 /*
-			showOtherWindow:function(){
+			showDoubleGird:function(){
 				var self = this;
 
-				if(this.target.data("twice")!="undefined" && this.target.data("twice")==true){
-					this.target.data("twice",false);
+				if(this.target.data("dbgrid")!="undefined" && this.target.data("dbgrid")==true){
+					this.target.data("dbgrid",false);
 					$(this.target.find(".filemgr-content-wrap")[1]).remove();
-					this.target.find(".filemgr-content-wrap").addClass("frame-current");
+					this.target.find(".filemgr-content-wrap").addClass(grid-current");
 					this.adjustWindow();
 				} else {
 
-					this.target.data("twice",true);	
+					this.target.data("dbgrid",true);	
 					this.$filemgr_content_wrap
-							.removeClass("frame-current")
-							.after("<div class=\"filemgr-resize dbframe\" /><div class=\"filemgr-content-wrap frame-current right-frame\"><div class=\"filemgr-tag\"><ul class=\"tag\"><li class=\"tag-scroll-left tag-scroll\">&lt;</li><li class=\"tag-scroll-right tag-scroll\">&gt;</li></ul></div><div class=\"filemgr-content-box\" /></div>");
+							.removeClass(grid-current")
+							.after("<div class=\"filemgr-resize dgrid\" /><div class=\"filemgr-content-wrapgrid-current rightgrid\"><div class=\"filemgr-tag\"><ul class=\"tag\"><li class=\"tag-scroll-left tag-scroll\">&lt;</li><li class=\"tag-scroll-right tag-scroll\">&gt;</li></ul></div><div class=\"filemgr-content-box\" /></div>");
 					
 					var url=this.getAddress();
 					this.showFile(url,this.getTagNameFromURL(url));
@@ -1243,7 +1244,7 @@ $(document).ready(function(){
 					}
 					//new this.dragSelect().dragSelect(this);
 					new this.dragSelect(this);
-					this.resizeBind(self.target.find(".dbframe"));
+					this.resizeBind(self.target.find(".dgrid"));
 
 					this.target.find(".tag-scroll-left.tag-scroll").bind("click",function(){self.leftScrollTag();})
 					this.target.find(".tag-scroll-right.tag-scroll").bind("click",function(){self.rightScrollTag();})
@@ -1251,16 +1252,16 @@ $(document).ready(function(){
 
 						e.preventDefault();
 						e.stopPropagation();
-						self.target.find(".filemgr-content-wrap").removeClass("frame-current");
+						self.target.find(".filemgr-content-wrap").removeClass(grid-current");
 						
-						$(this).addClass("frame-current");
+						$(this).addClass(grid-current");
 					});
 				}	
 			},
 */		
 			dragSelect: function(){
 				var self = this,
-					filemgrContentBox = this.target.find(".frame-current .filemgr-content-box"),
+					filemgrContentBox = this.target.find(".grid-current .filemgr-content-box"),
 					selectDiv = $("div.fwindow-resize-helper"),
 					target;
 				
@@ -1299,7 +1300,6 @@ $(document).ready(function(){
 
 				function onBeforeSelect(e){
 
-					//selectDiv.css({'background-color':'#C3D5ED',filter:'alpha(opacity:60)',opacity:'0.6'});
 					self.startX = e.pageX;//-fm.fw.getOffset().l;
 					self.startY = e.pageY;//-fm.fw.getOffset().t;
 					if( target.length != 0 ){
@@ -1383,30 +1383,30 @@ $(document).ready(function(){
 
 			eventBind: function(){
 				var self = this,		
-					$filemgrContentBox = this.target.find(".frame-current .filemgr-content-box");
+					$filemgrContentBox = this.target.find(".grid-current .filemgr-content-box");
 				
 				this.$address.find("#go_button").bind("click",function(){
 					var url = self.getAddress();
-					self.showFile(fixURL(url),self.getTagNameFromURL(url));
+					self.showFile(fatterOS.tools.fixURL(url),self.getTagNameFromURL(url));
 				});
 
 				this.$address.find("#forword_button").bind("click",function(){
 					if(this.className == "disabled")return;
-					var currentTagId = self.target.find(".frame-current .tag-current").attr("id");
+					var currentTagId = self.target.find("grid-current .tag-current").attr("id");
 					self.goForword(currentTagId);
 				});
 
 				this.$address.find("#back_button").bind("click",function(){
 					if(this.className == "disabled")return;
-					var currentTagId = self.target.find(".frame-current .tag-current").attr("id");
+					var currentTagId = self.target.find(".grid-current .tag-current").attr("id");
 					self.goBack(currentTagId);
 				});
 
-				this.target.find(".frame-current .tag-scroll-left").bind("click",function(){
+				this.target.find(".grid-current .tag-scroll-left").bind("click",function(){
 					self.scrollTags();
 				});
 
-				this.target.find(".frame-current .tag-scroll-right").bind("click",function(){
+				this.target.find(".grid-current .tag-scroll-right").bind("click",function(){
 					self.scrollTags(-1);
 				});
 				//Enter键
@@ -1415,7 +1415,7 @@ $(document).ready(function(){
 					{
 						e.preventDefault();
 						var url = self.getAddress();
-						self.showFile(fixURL(url),self.getTagNameFromURL(url));
+						self.showFile(fatterOS.tools.fixURL(url),self.getTagNameFromURL(url));
 					}
 				});
 
@@ -1445,6 +1445,21 @@ $(document).ready(function(){
 
 	
 	fatterOS.system = {
+
+		preload: function(){
+			var $preload = 	$("#preload"),
+				$startingBar = $("#starting_bar"),
+				clientHeight = fatterOS.clientInfo.clientHeight(),
+				clientWidth = fatterOS.clientInfo.clientWidth();
+
+			$startingBar.progressBar(100,{speed:25,callback:function(data){
+				if( data.running_value == data.value ){
+					$preload.fadeOut("slow");
+				}
+			}});
+			return this;
+		},
+
 		contextmenu: function(place,srcE){
 								var content = {
 										default:["刷新","粘贴","|","新建文件夹","新建文本","|","属性"],
@@ -1479,6 +1494,7 @@ $(document).ready(function(){
 								}
 								$("<ul class=\"fatterOS-contextmenu\" />").append($(html).bind("mousedown",function(e){
 																			e.stopPropagation();
+																			e.preventDefault();
 																			var cmd = $(this).attr("name");
 																			self[cmd] && self[cmd](srcE);
 																			//fatterOS.desktop[cmd] && fatterOS.desktop[cmd]();
@@ -1512,38 +1528,64 @@ $(document).ready(function(){
 		//	var targets = $(".content-current .selected");
 			var targets = fatterOS.cache.select;
 			$.each(targets,function(i){
-				console.log(targets[i])
-				//fatterOS.cache.clipBoard.push(targets[i]);
+				fatterOS.cache.clipBoard.push(targets[i]);
 			});
 		},
 
 		rm: function(){
 			var targets = $(".content-current .selected");
 			//var targets = fatterOS.cache.select;
-			fatterOS.confirm("确定删除这"+targets.length+"项吗？",function(value){
-				if(value){
-					$.each(targets,function(i){
-						$(targets[i]).remove();
-					})
-				}
-			})
+			if(targets.length){
+				fatterOS.confirm("确定删除这"+targets.length+"项吗？",function(value){
+					if(value){
+						$.each(targets,function(i){
+							$(targets[i]).remove();
+						})
+					}
+				})
+			}
 		},
-
+//TODO 重写isFileExist方法
 		paste: function(){
-			var clipBoard = fatterOS.cache.clipBoard,
-				place = $(".content-current");
-			$.each(clipBoard,function(i){
-				place.append(clipBoard[i]);
+			var self = this,
+				clipBoard = fatterOS.cache.clipBoard,
+				place = $(".content-current"),
+				content_id = place.attr("id"),
+				tag_id = content_id.substring(8,content_id.length);
+			console.log(tag_id)
+			$.each(clipBoard,function(i,key){
+				var html = $("[data-key="+key+"]"),
+					name = html.attr("data-name");
+					if(self.isFileExist(name,tag_id) > -1){
+						fatterOS.confirm("确定覆盖"+name+"吗？",function(value){
+							if(value){	//TODO 不能简单的append，先删除以前的文件，再append
+								place.append(html);
+							} else {
+								return;
+							}
+						})
+					} else {
+						place.append(html);
+					}
 			})
 		},
 
 		rename:	function(){
-			var targets = $(".content-current .selected");
-			targets.find("input").focus();
+		//	var targets = $(".content-current .selected");
+			var keys = fatterOS.cache.select,
+				target = null;
+
+			$.each(keys,function(i,key){
+				fatterOS.cache.rename[i] = key;
+				target = $("[data-key="+key+"]");
+				target.find("span").hide();
+				target.find("input").show().focus();
+		
+			})
 		},
 
 		mkdir: function(){
-			var tag_id = $(".frame-current .tag-current").attr("id"),
+			var tag_id = $(".grid-current .tag-current").attr("id"),
 				content_id = "content_" + tag_id,
 				place = $("#"+content_id),
 				name = '新建文件夹',
@@ -1557,7 +1599,7 @@ $(document).ready(function(){
 		},
 
 		mkfile: function(){
-			var tag_id = $(".frame-current .tag-current").attr("id"),
+			var tag_id = $(".grid-current .tag-current").attr("id"),
 				content_id = "content_" + tag_id,
 				place = $("#"+content_id),
 				name = '新建文本',
@@ -1639,6 +1681,7 @@ $(document).ready(function(){
 
 	fatterOS.cache = {
 		select: [],
+		rename: [],
 		clipBoard:[],
 		tabs: {}
 	};
@@ -1646,132 +1689,133 @@ $(document).ready(function(){
 	//实现全部的事件
 	fatterOS.eventBind   = fatterOS.eventBind || {};
 	fatterOS.eventBind = {
+		
 		windowBind:	function(){
-								$(window).resize(function(){
-									
-								});	
-							},
+			$(window).resize(function(){
+				
+			});	
+		},
 
 		documentBind: function(){
-								this.$document = $(document);
-								this.$context = fatterOS.system.$context || $("#fatterOS_context");
-								/*全局点击事件开始*/
-								this.$document.bind("mousedown.globle",function(e){
-									//e.preventDefault();
-									fatterOS.eventBind.$startMenu.hide();
-									fatterOS.eventBind.$context.empty();
-									if ( !$(e.target).is('input,textarea,select') ) {
-										$('input,textarea').blur();
-									}
-								});
-								/*全局点击事件结束*/
+			this.$document = $(document);
+			this.$context = fatterOS.system.$context || $("#fatterOS_context");
+			/*全局点击事件开始*/
+			this.$document.bind("mousedown.globle",function(e){
+				//e.preventDefault();
+				fatterOS.eventBind.$startMenu.hide();
+				fatterOS.eventBind.$context.empty();
+				if ( !$(e.target).is("input,textarea,select") ) {
+					$("input,textarea").blur();
+					var rename = fatterOS.cache.rename;
+					if(rename.length !== 0){
+						$.each(rename,function(i,key){
+							var $file = $("[data-key="+key+"]");
+							
+							$file.find("input").hide();
+							$file.find("span").show();
+						})
+					}
 
-								/*全局右键事件开始*/
-								this.$document.bind("contextmenu.globle",function(e){
-									e.preventDefault();
-									e.stopPropagation();
-									fatterOS.system.contextmenu("default",e);
-								});
-								/*全局右键事件结束*/
+					fatterOS.cache.rename = [];
+				}
+			});
+			/*全局点击事件结束*/
 
-								/*全局鼠标移动事件开始*/
-								this.$document.bind("mousemove.globle",function(e){
-								
-								});
-								/*全局鼠标移动事件结束*/
+			/*全局右键事件开始*/
+			this.$document.bind("contextmenu.globle",function(e){
+				e.preventDefault();
+				e.stopPropagation();
+				fatterOS.system.contextmenu("default",e);
+			});
+			/*全局右键事件结束*/
 
-								/*全局键盘事件开始*/
-								this.$document.bind("keydown.globle",function(e){
-									//console.log(e.keyCode);		
-								});
-								/*全局键盘事件结束*/
-								//搜索框
-								var $searchInput=$("#search_input");
-								var $searchBtn=$("#search_button");
-								$searchInput.bind("click",function(){
-									if($searchInput.val()=="搜索...")
-										$searchInput.val("");
-								}).blur(function(){
-									if($searchInput.val()=="")
-										$searchInput.val("搜索...");
-								});
+			/*全局鼠标移动事件开始*/
+			this.$document.bind("mousemove.globle",function(e){
+			
+			});
+			/*全局鼠标移动事件结束*/
 
-								return this;
-							},
-		desktopBind		:	function(){
-								this.$desktop = $("#desktop");
-						
-								/*桌面程序单击开始*/
-								this.$desktop.bind("click.openApp",function(e){
-									e.preventDefault();
-									fatterOS.desktop.openApp(e);
-									//TODO 事件代理
-									/*
-									var target;
-									if(e.target.className === "app-button")
-										target = e.target;
-									else
-										if(e.target.parentNode.className === "app-button")
-											target = e.target.parentNode;
-										else
-											if(e.target.parentNode.parentNode.className === "app-button")
-												target = e.target.parentNode.parentNode;
+			/*全局键盘事件开始*/
+			this.$document.bind("keydown.globle",function(e){
+				//console.log(e.keyCode);		
+			});
+			/*全局键盘事件结束*/
+			//搜索框
+			var $searchInput=$("#search_input");
+			var $searchBtn=$("#search_button");
+			$searchInput.bind("click",function(){
+				if($searchInput.val()=="搜索...")
+					$searchInput.val("");
+			}).blur(function(){
+				if($searchInput.val()=="")
+					$searchInput.val("搜索...");
+			});
 
-									if(target){
-										fatterOS.desktop.openApp(target.dataset.name,target.dataset.type);
-									}*/
+			return this;
+		},
 
-								});
-								/*桌面程序单击结束*/
-								
-								/*桌面程序右键开始*/
-								this.$desktop.bind("contextmenu.openApp",function(e){
-									e.stopPropagation();
-									e.preventDefault();
-									fatterOS.system.contextmenu("desktop",e);
-								});
-								return this;
-							},
-		bottombarBind	:	function(){
+		desktopBind: function(){
+			this.$desktop = $("#desktop");
+	
+			/*桌面程序单击开始*/
+			this.$desktop.bind("click.openApp",function(e){
+				e.preventDefault();
+				fatterOS.desktop.openApp(e);
+			});
+			/*桌面程序单击结束*/
+			
+			/*桌面程序右键开始*/
+			this.$desktop.bind("contextmenu.openApp",function(e){
+				e.stopPropagation();
+				e.preventDefault();
+				fatterOS.system.contextmenu("desktop",e);
+			});
+			return this;
+		},
+
+		bottombarBind: function(){
 				
-							},
-		startButtonBind	:	function(){
-								this.$startBtn = $("#start_button"),
-								this.$startImg = this.$startBtn.find("#start_icon"),
-								this.$startMenu	= $("#start_menu");
-								/*开始菜单点击开始*/
-								this.$startBtn.bind("click.startmenu",function(e){
-									e.stopPropagation();
-									fatterOS.eventBind.$startMenu.toggle();
-								});
-								/*开始菜单点击结束*/
+		},
 
-								/*开始菜单hover开始*/
-								this.$startBtn.hover(function(){
-										fatterOS.eventBind.$startImg.attr("src","images/start_3.png");
-									},function(){
-										fatterOS.eventBind.$startImg.attr("src","images/start_1.png");
-									})
-								return this;
-							},
-		startButtonUnbind:	function(){
-								this.$startBtn.unbind("click.startmenu");
-							},
-		showDesktopBind	:	function(){
-								var $showDesktopButton = $("#showDesktop"),
-									isHidden = false;
+		startButtonBind: function(){
+			this.$startBtn = $("#start_button"),
+			this.$startImg = this.$startBtn.find("#start_icon"),
+			this.$startMenu	= $("#start_menu");
+			/*开始菜单点击开始*/
+			this.$startBtn.bind("click.startmenu",function(e){
+				e.stopPropagation();
+				fatterOS.eventBind.$startMenu.toggle();
+			});
+			/*开始菜单点击结束*/
 
-								$showDesktopButton.bind("click",function(){
-									var $taskLists	= $("div.fwindow");
-									if(isHidden){
-										$taskLists.show();
-										isHidden = false;
-									}else{
-										$taskLists.hide();
-										isHidden = true;
-									}
-								});
-								return this;
+			/*开始菜单hover开始*/
+			this.$startBtn.hover(function(){
+					fatterOS.eventBind.$startImg.attr("src","images/start_3.png");
+				},function(){
+					fatterOS.eventBind.$startImg.attr("src","images/start_1.png");
+				})
+			return this;
+		},
+
+		startButtonUnbind: function(){
+			this.$startBtn.unbind("click.startmenu");
+		},
+
+		showDesktopBind:function(){
+			var $showDesktopButton = $("#showDesktop"),
+				isHidden = false;
+
+			$showDesktopButton.bind("click",function(){
+				var $taskLists	= $("div.fwindow");
+				if(isHidden){
+					$taskLists.show();
+					isHidden = false;
+				}else{
+					$taskLists.hide();
+					isHidden = true;
+				}
+			});
+			return this;
 		},
 
 	};
@@ -1783,28 +1827,14 @@ $(document).ready(function(){
 	 *
 	 */
 	fatterOS.desktop = {
-	//TODO	move those to system.prestart;
-		preload: function(){
-			var $preload = 	$("#preload"),
-				$startingBar = $("#starting_bar"),
-				clientHeight = fatterOS.clientInfo.clientHeight(),
-				clientWidth = fatterOS.clientInfo.clientWidth();
-
-			$startingBar.progressBar(100,{speed:25,callback:function(data){
-				if( data.running_value == data.value ){
-					$preload.fadeOut("slow");
-				}
-			}});
-			return this;
-		},
-		
+			
 		init: function(){
 			var $cloud = $(".scene-cloud"),
 				cloud_x = -500,
 				clientWidth  = fatterOS.clientInfo.clientWidth(),
 				clientHeight = fatterOS.clientInfo.clientHeight();
 			
-			this.preload();
+			fatterOS.system.preload();
 			this.creatTaskbarTime();
 
 			setInterval(function(){
@@ -1840,7 +1870,7 @@ $(document).ready(function(){
 		},
 	
 		openApp: function(e){
-			//TODO 事件代理
+			
 			var target,name,type;
 			if(e.target.className === "app-button")
 				target = e.target;
@@ -1927,9 +1957,11 @@ $(document).ready(function(){
 			}
 			return str;
 		},
-/*
+
 		fixURL: function(str){	
-			var l = str.length;
+			var self = this,
+				l = str.length;
+				
 			if(str.substring(0,1) == "/"  ||  str.substring(0,1) == "\\"){
 				str = str.substring(1,str.length);
 			}
@@ -1937,10 +1969,10 @@ $(document).ready(function(){
 			if(str.substring(ll-1,ll) == "/"  ||  str.substring(ll-1,ll) == "\\"){
 				str = str.substring(0,ll-1);
 			}
-			var url = str.split("/");
-			var s = "/";
+			var url = str.split("/"),
+				s = "/";
 			$.each(url,function(i){
-				url[i] = encodeChinese(url[i]);
+				url[i] = self.encodeChinese(url[i]);
 				s += url[i]+"/";
 			});
 			s = s.substring(0,s.length-1);
@@ -1953,7 +1985,7 @@ $(document).ready(function(){
 			}
 			return str;
 		},
-*/
+
 		getClientTop: function(){
 					 
 	//		return 0;			 
@@ -1990,8 +2022,3 @@ $(document).ready(function(){
 	fatterOS.tips("欢迎使用fatterOS!");
 	window.fatterOS = fatterOS;
 });
-
-function logout(){
-	if(confirm("确认退出？","温馨提示"))
-		window.close();
-}

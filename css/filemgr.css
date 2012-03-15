@@ -191,7 +191,7 @@ top: 0;
 .tag-current{
 background-color:#F4FFFD;
 }
-.frame-current .tag-current{
+.grid-current .tag-current{
 background-color:#fff;
 }
 ul.tag li a{
@@ -245,7 +245,7 @@ border-bottom:none;
 overflow:auto;
 margin-top:-1px;
 }
-.frame-current .filemgr-content-box{
+.grid-current .filemgr-content-box{
 background:#fff;
 }
 .content-inner{
@@ -272,7 +272,18 @@ float:left;
 .docs-list div{
 margin-top:5px;
 }
+.docs-list span{
+display:block;
+text-align:center;
+font-size:9px;
+margin:0 2px;
+width:55px;
+height:25px;
+overflow:hidden;
+word-wrap:break-word;
+}
 .docs-list input{
+display:none;
 border:none;
 text-align:center;
 font-size:9px;
@@ -280,9 +291,10 @@ margin:0 2px;
 width:55px;
 word-wrap:break-word;
 }
+/*
 .docs-list:hover input{
 background-color:#D2E5FA;
-}
+}*/
 .docs-list img{
 width:30px;
 height:30px;
