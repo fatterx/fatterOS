@@ -797,17 +797,17 @@ $(document).ready(function(){
 
 				var self = this,
 					left_nav_tree = self.$left_nav_tree,
-					leftgrid = self.$filemgr_content_wrap;
+					left_grid = self.$filemgr_content_wrap;
 
 				(function( self ){
 
-					resizeHandle.bind("mousedowngrid_resize",function(e){
+					resizeHandle.bind("mousedown.grid_resize",function(e){
 						e.preventDefault();
 						e.stopPropagation();
 						onBeforeResize(e);
 					});
 
-					$(document).bind("mousemovegrid_resize",function(e){
+					$(document).bind("mousemove.grid_resize",function(e){
 						e.preventDefault(); 
 						if( self.onResizeLeftSide ){
 								onResizeLeft(e);
@@ -816,7 +816,7 @@ $(document).ready(function(){
 						}
 					});
 
-					$(document).bind("mouseupgrid_resize",function(e){
+					$(document).bind("mouseup.grid_resize",function(e){
 						onResizeEnd();
 					});
 
@@ -836,11 +836,11 @@ $(document).ready(function(){
 							var l_width = Math.max( Math.min( e.pageX - self.target.offset().left,300 ), 100 );
 							left_nav_tree.css("width",l_width);
 
-							if( self.target.find(".rightgrid").html() ){
-								var rightgrid = self.target.find(".rightgrid"),
+							if( self.target.find(".right-grid").html() ){
+								var right_grid = self.target.find(".right-grid"),
 									r_width = (self.target.parent().width()-l_width)/2 - 7;
-								leftgrid.css("width",r_width);
-								rightgrid.css("width",r_width);
+								left_grid.css("width",r_width);
+								right_grid.css("width",r_width);
 							}
 						}
 
@@ -851,11 +851,11 @@ $(document).ready(function(){
 						if(self.isResize){
 
 								var left_width  = left_nav_tree.width();
-								var rightgrid = self.target.find(".rightgrid");
-								var right_totol = rightgrid.width() + leftgrid.width();
+								var right_grid = self.target.find(".right-grid");
+								var right_totol = right_grid.width() + left_grid.width();
 								var _width = Math.max( Math.min( e.pageX - self.target.offset().left - left_width, 500 ), 150 );
-								leftgrid.css("width",_width);
-								rightgrid.css("width",right_totol - _width);
+								left_grid.css("width",_width);
+								right_grid.css("width",right_totol - _width);
 						}
 
 					}
@@ -1227,14 +1227,14 @@ $(document).ready(function(){
 				if(this.target.data("dbgrid")!="undefined" && this.target.data("dbgrid")==true){
 					this.target.data("dbgrid",false);
 					$(this.target.find(".filemgr-content-wrap")[1]).remove();
-					this.target.find(".filemgr-content-wrap").addClass(grid-current");
+					this.target.find(".filemgr-content-wrap").addClass("grid-current");
 					this.adjustWindow();
 				} else {
 
 					this.target.data("dbgrid",true);	
 					this.$filemgr_content_wrap
-							.removeClass(grid-current")
-							.after("<div class=\"filemgr-resize dgrid\" /><div class=\"filemgr-content-wrapgrid-current rightgrid\"><div class=\"filemgr-tag\"><ul class=\"tag\"><li class=\"tag-scroll-left tag-scroll\">&lt;</li><li class=\"tag-scroll-right tag-scroll\">&gt;</li></ul></div><div class=\"filemgr-content-box\" /></div>");
+							.removeClass("grid-current")
+							.after("<div class=\"filemgr-resize dbgrid\" /><div class=\"filemgr-content-wrap grid-current right-grid\"><div class=\"filemgr-tag\"><ul class=\"tag\"><li class=\"tag-scroll-left tag-scroll\">&lt;</li><li class=\"tag-scroll-right tag-scroll\">&gt;</li></ul></div><div class=\"filemgr-content-box\" /></div>");
 					
 					var url=this.getAddress();
 					this.showFile(url,this.getTagNameFromURL(url));
@@ -1244,7 +1244,7 @@ $(document).ready(function(){
 					}
 					//new this.dragSelect().dragSelect(this);
 					new this.dragSelect(this);
-					this.resizeBind(self.target.find(".dgrid"));
+					this.resizeBind(self.target.find(".dbgrid"));
 
 					this.target.find(".tag-scroll-left.tag-scroll").bind("click",function(){self.leftScrollTag();})
 					this.target.find(".tag-scroll-right.tag-scroll").bind("click",function(){self.rightScrollTag();})
@@ -1252,9 +1252,9 @@ $(document).ready(function(){
 
 						e.preventDefault();
 						e.stopPropagation();
-						self.target.find(".filemgr-content-wrap").removeClass(grid-current");
+						self.target.find(".filemgr-content-wrap").removeClass("grid-current");
 						
-						$(this).addClass(grid-current");
+						$(this).addClass("grid-current");
 					});
 				}	
 			},
@@ -1392,7 +1392,7 @@ $(document).ready(function(){
 
 				this.$address.find("#forword_button").bind("click",function(){
 					if(this.className == "disabled")return;
-					var currentTagId = self.target.find("grid-current .tag-current").attr("id");
+					var currentTagId = self.target.find(".grid-current .tag-current").attr("id");
 					self.goForword(currentTagId);
 				});
 
