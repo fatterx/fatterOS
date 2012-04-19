@@ -257,7 +257,7 @@ $(document).ready(function(){
 				this.mask.remove();
 			}
 			
-			if( onClose !== null && typeof onClose === "function" )
+			if( typeof onClose === "function" )
 				onClose();
 		},
 
@@ -283,10 +283,10 @@ $(document).ready(function(){
 									"height": fixedHeight-22
 							});
 
-			if( callback !== null && typeof callback === "function" )
+			if( typeof callback === "function" )
 				callback(args);
 
-			if(this.resizeCallback !== null && typeof this.resizeCallback === "function")
+			if( typeof this.resizeCallback === "function" )
 				this.resizeCallback();
 
 			return this;
@@ -1263,20 +1263,23 @@ $(document).ready(function(){
 				var self = this,
 					filemgrContentBox = this.target.find(".grid-current .filemgr-content-box"),
 					selectDiv = $("div.fwindow-resize-helper"),
-					target;
+					target = null;
 				
 				function selectBind(){
 					filemgrContentBox.bind("mousedown.drag_select",function(e){
 						e.preventDefault();
 					//	e.stopPropagation();
-						target = $(e.target).parents(".docs-list");
+					target = $(e.target).parents(".docs-list");
+					var	selectLength = fatterOS.cache.select.length;
+
 						if( target.length != 0 ){  //选中文件
 							//如果没有按住shift or ctrl键
 							if( !e.shiftKey && !e.ctrlKey ){
 								if( e.button != "2" ){
 									self.unSelectAllTarget();
+								} else if (selectLength == 0){
+									self.selectTarget(target);
 								}
-								self.selectTarget(target);
 							} else {
 								target.toggleClass("selected");
 							}
@@ -1461,61 +1464,61 @@ $(document).ready(function(){
 		},
 
 		contextmenu: function(place,srcE){
-								var content = {
-										default:["刷新","粘贴","|","新建文件夹","新建文本","|","属性"],
-										desktop:["打开应用","卸载应用"],
-										filemgr:["刷新","粘贴","|","上传","全选","|","属性"],
-										target :["下载","复制","删除","改名","|","属性"]
-									},
-									content_cmd = {
-										default:["reload","paste","|","mkdir","mkfile","|","info"],
-										desktop:["runApp","removeApp"],
-										filemgr:["reload","paste","|","upload","selectAll","info"],
-										target:["download","copy","rm","rename","|","info"]
-									},
-									clientWidth  = fatterOS.clientInfo.clientWidth(),
-									clientHeight = fatterOS.clientInfo.clientHeight(),
-									context = content[place],
-									cmd = content_cmd[place],
-									html = "",
-									split = "<div class=\"split\"></div>",
-									offsetX = 10,
-									offsetY = 10,
-									x = 0,
-									y = 0,
-									self= this;
+			var content = {
+					default:["刷新","粘贴","|","新建文件夹","新建文本","|","属性"],
+					desktop:["打开应用","卸载应用"],
+					filemgr:["刷新","粘贴","|","上传","全选","|","属性"],
+					target :["下载","复制","删除","改名","|","属性"]
+				},
+				content_cmd = {
+					default:["reload","paste","|","mkdir","mkfile","|","info"],
+					desktop:["runApp","removeApp"],
+					filemgr:["reload","paste","|","upload","selectAll","info"],
+					target:["download","copy","rm","rename","|","info"]
+				},
+				clientWidth  = fatterOS.clientInfo.clientWidth(),
+				clientHeight = fatterOS.clientInfo.clientHeight(),
+				context = content[place],
+				cmd = content_cmd[place],
+				html = "",
+				split = "<div class=\"split\"></div>",
+				offsetX = 10,
+				offsetY = 10,
+				x = 0,
+				y = 0,
+				self= this;
 
-								this.$context = $("#fatterOS_context");
-								for(var i = 0; i != context.length; ++i){
-									if(context[i] === "|")
-										html += split;
-									else
-										html += "<li name=\""+cmd[i]+"\">"+context[i]+"</li>";
-								}
-								$("<ul class=\"fatterOS-contextmenu\" />").append($(html).bind("mousedown",function(e){
-																			e.stopPropagation();
-																			e.preventDefault();
-																			var cmd = $(this).attr("name");
-																			self[cmd] && self[cmd](srcE);
-																			//fatterOS.desktop[cmd] && fatterOS.desktop[cmd]();
-																			self.$context.empty();
-																			}))
-											.appendTo(this.$context);
-								
-								if( srcE.pageX + offsetX + this.$context.width() > clientWidth )
-									x = clientWidth - this.$context.width() - offsetX;
-								else
-									x = srcE.pageX + offsetX;
-								//TODO y-->200
-								if( srcE.pageY + offsetY + 200 > clientHeight )
-									y = clientHeight - 200 - offsetY;
-								else
-									y = srcE.pageY + offsetY;
-								this.$context.css({left:x,top:y}).show();
-								this.$context.hover(function(){},function(){
-									fatterOS.system.$context.empty();		
-								});
-							},
+			this.$context = $("#fatterOS_context");
+			for(var i = 0; i != context.length; ++i){
+				if(context[i] === "|")
+					html += split;
+				else
+					html += "<li name=\""+cmd[i]+"\">"+context[i]+"</li>";
+			}
+			$("<ul class=\"fatterOS-contextmenu\" />").append($(html).bind("mousedown",function(e){
+														e.stopPropagation();
+														e.preventDefault();
+														var cmd = $(this).attr("name");
+														self[cmd] && self[cmd](srcE);
+														//fatterOS.desktop[cmd] && fatterOS.desktop[cmd]();
+														self.$context.empty();
+														}))
+						.appendTo(this.$context);
+			
+			if( srcE.pageX + offsetX + this.$context.width() > clientWidth )
+				x = clientWidth - this.$context.width() - offsetX;
+			else
+				x = srcE.pageX + offsetX;
+			//TODO y-->200
+			if( srcE.pageY + offsetY + 200 > clientHeight )
+				y = clientHeight - 200 - offsetY;
+			else
+				y = srcE.pageY + offsetY;
+			this.$context.css({left:x,top:y}).show();
+			this.$context.hover(function(){},function(){
+				fatterOS.system.$context.empty();		
+			});
+		},
 		/*select:	function(){
 									
 		},
@@ -1526,53 +1529,87 @@ $(document).ready(function(){
 */
 		copy: function(){
 		//	var targets = $(".content-current .selected");
-			var targets = fatterOS.cache.select;
+			var targets = fatterOS.cache.select,
+				place = $(".content-current");
+			
 			$.each(targets,function(i){
 				fatterOS.cache.clipBoard.push(targets[i]);
 			});
+			fatterOS.cache.clipPlace = place.attr("id");
+
 		},
 
-		rm: function(){
-			var targets = $(".content-current .selected");
-			//var targets = fatterOS.cache.select;
-			if(targets.length){
-				fatterOS.confirm("确定删除这"+targets.length+"项吗？",function(value){
-					if(value){
-						$.each(targets,function(i){
-							$(targets[i]).remove();
+		rm: function(place,keys,interactive){
+			
+			if(keys){
+				if(!interactive){
+					fatterOS.confirm("确定删除这"+targets.length+"项吗？",function(value){
+						if(value){
+							if(typeof keys == "string"){
+								$("[data-key="+keys+"]",place).remove();
+							} else {
+								$.each(keys,function(i,key){
+									$("[data-key="+key+"]",place).remove();
+								})
+							}
+						}
+					})
+				} else {
+					if(typeof keys == "string"){
+						$("[data-key="+keys+"]",place).remove();
+					} else {
+						$.each(keys,function(i,key){
+							$("[data-key="+key+"]",place).remove();
 						})
 					}
-				})
+				}
 			}
 		},
-//TODO 重写isFileExist方法
+//TODO	remove HashFile
 		paste: function(){
 			var self = this,
 				clipBoard = fatterOS.cache.clipBoard,
+				//place = $(".content-current"),
+				src_content_id = fatterOS.cache.clipPlace,
+				src_place = $("#"+src_content_id),
 				place = $(".content-current"),
-				content_id = place.attr("id"),
-				tag_id = content_id.substring(8,content_id.length);
-			console.log(tag_id)
+				content_id = place.attr("id");
+			//	tag_id = content_id.substring(8,content_id.length);
+			
 			$.each(clipBoard,function(i,key){
-				var html = $("[data-key="+key+"]"),
-					name = html.attr("data-name");
-					if(self.isFileExist(name,tag_id) > -1){
-						fatterOS.confirm("确定覆盖"+name+"吗？",function(value){
-							if(value){	//TODO 不能简单的append，先删除以前的文件，再append
-								place.append(html);
-							} else {
-								return;
+				var src = $("[data-key="+key+"]",src_place).eq(0),
+					fullName = src.attr("data-name"),
+					clone = src.clone(),
+					fileExist = false;
+				
+				if(src_content_id == content_id){
+					var splitName = self.spiltFileName(fullName),
+						name = splitName.name,
+						ext = splitName.ext,
+						fullName2 = self.uniqueName(name,ext,content_id);
+					//TODO 优化这里
+					clone.attr("data-name",fullName2).find("input").val(fullName2).end().find("span").html(fullName2).end().appendTo(place);
+				} else {
+					fileExist = self.isFileExist(fullName,content_id);
+					if(fileExist){	// 同一place 复制， 不同 place 替换
+						fatterOS.confirm("确定覆盖"+fullName+"吗？",function(value){
+							if(value){
+								self.rm(place,fileExist.attr("data-key"),"quite");
+								place.append(clone);
 							}
 						})
 					} else {
-						place.append(html);
+						place.append(clone);
 					}
+					fatterOS.cache.clipPlace = content_id;
+				}
 			})
 		},
 
 		rename:	function(){
 		//	var targets = $(".content-current .selected");
 			var keys = fatterOS.cache.select,
+				tag_id = $(".grid-current .tag-current").attr("id"),
 				target = null;
 
 			$.each(keys,function(i,key){
@@ -1581,7 +1618,8 @@ $(document).ready(function(){
 				target.find("span").hide();
 				target.find("input").show().focus();
 		
-			})
+			});
+			//this.updateHash(tag_id,,"rename");
 		},
 
 		mkdir: function(){
@@ -1589,13 +1627,10 @@ $(document).ready(function(){
 				content_id = "content_" + tag_id,
 				place = $("#"+content_id),
 				name = '新建文件夹',
-				fileName = this.uniqueName(name,"",tag_id),		
-				html = "<div class=\"docs-list\"><div class=\"file-text\"><img alt=\"\" src=\"images/ext/folder.png\"/><input type=\"text\" value="+fileName+" /></div></div>",
-				data = fatterOS.cache.tabs[tag_id],
-				hashList = data.hashList,
-				hashNo = data.hashNo;
+				fileName = this.uniqueName(name,"",content_id),		
+				html = "<div class=\"docs-list\"><div class=\"file-text\"><img alt=\"\" src=\"images/ext/folder.png\"/><span class=\"fileName\">"+fileName+"</span><input type=\"text\" value="+fileName+" /></div></div>";
 			place.append(html);
-			hashList[hashNo].fileName.push(fileName);
+			//this.updateHash(tag_id,fileName,"add");
 		},
 
 		mkfile: function(){
@@ -1604,46 +1639,62 @@ $(document).ready(function(){
 				place = $("#"+content_id),
 				name = '新建文本',
 				ext = '.txt',
-				fileName = this.uniqueName(name,ext,tag_id),		
-				html = "<div class=\"docs-list\"><div class=\"file-text\"><img alt=\"\" src=\"images/ext/txt.png\"/><input type=\"text\" value="+fileName+" /></div></div>",
-				data = fatterOS.cache.tabs[tag_id],
-				hashList = data.hashList,
-				hashNo = data.hashNo;
+				fileName = this.uniqueName(name,ext,content_id),		
+				html = "<div class=\"docs-list\" data-name="+fileName+"><div class=\"file-text\"><img alt=\"\" src=\"images/ext/txt.png\"/><span class=\"fileName\">"+fileName+"</span><input type=\"text\" value="+fileName+" /></div></div>";
+
 			place.append(html);
-			hashList[hashNo].fileName.push(fileName);
-	
+			//this.updateHash(tag_id,fileName,"add");
 		},
 	
 		isValidName: function(name){
 			return name.match(/^[^\\\/\<\>:]+$/);
 		},
 
-		isFileExist: function(name,tag_id){
-			var data = fatterOS.cache.tabs[tag_id],
-				hashList = data.hashList,
-				hashNo = data.hashNo,
-				filesName = hashList[hashNo].fileName;
-			for(var i in filesName){
-				if(name === filesName[i]){
-					return i;
+		isFileExist: function(name,content_id){
+		
+			var $currentContent = $("#"+content_id),
+				$targets = $currentContent.find("div"),
+				len = $targets.length,
+				i = 0;
+			
+			for(; i<len; ++i){
+				if(name == $($targets[i]).attr("data-name")){
+					return $($targets[i]);
 				}
 			}
-			return -1;
+			return false;
+	
 		},
 
-		uniqueName: function(name,ext,tag_id){
+		uniqueName: function(name,ext,content_id){
 			var i = 0;
-			if(this.isFileExist(name+ext,tag_id) < 0){
+			if(!this.isFileExist(name+ext,content_id)){
 				return name+ext;
 			}
 
 			while(++i < 50){
-				if(this.isFileExist(name+i+ext,tag_id) < 0){
+				if(!this.isFileExist(name+i+ext,content_id)){
 					return name+i+ext;
 				}
 			}
 
-			return name+Math.random()+ext;
+			return name+(Math.random()*100)+ext;
+		},
+
+		spiltFileName: function(fullName){
+			var name = fullName.match(/^.*(?=\.)/g),
+				ext	 = fullName.match(/\.[^\.]+$/);
+			if(name == null){
+				return {
+					name: fullName,
+					ext: ""
+				}
+			} else {
+				return {
+					name: name,
+					ext: ext
+				}
+			}
 		},
 
 		upload: function(){
@@ -1660,8 +1711,16 @@ $(document).ready(function(){
 
 		runApp: function(srcE){
 			fatterOS.desktop.openApp(srcE);	
-		},	
+		},
+		/*
+		updateHash:	function(tag_id){
+			var	data = fatterOS.cache.tabs[tag_id],
+				hashList = data.hashList,
+				hashNo = data.hashNo;
 
+			hashList[hashNo].fileName.push(fileName);
+
+		}*/
 	};
 
 	fatterOS.clientInfo = {
@@ -1682,7 +1741,8 @@ $(document).ready(function(){
 	fatterOS.cache = {
 		select: [],
 		rename: [],
-		clipBoard:[],
+		clipBoard:	[],
+		clipPlace:	"",	
 		tabs: {}
 	};
 
@@ -2014,6 +2074,9 @@ $(document).ready(function(){
 						top		: t,
 						bottom	: b
 					}
+		},
+		pushSelect: function(){
+						
 		},
 		
 	};
