@@ -70,6 +70,7 @@ $(document).ready(function(){
 		//将fwindow插入到父div中
 		$(document.body).append(this.target);
 
+		this.mask  = $("div.fwindow-mask");
 		this.resizeHelper = $("div.fwindow-resize-helper");
 		//是否最大化，状态
 		this.maxed = false;
@@ -253,9 +254,7 @@ $(document).ready(function(){
 			var onClose = this.options.onClose;
 			this.target.remove();
 
-			if(this.mask){
-				this.mask.remove();
-			}
+			this.mask.hide();
 			
 			if( typeof onClose === "function" )
 				onClose();
@@ -345,10 +344,10 @@ $(document).ready(function(){
 		},
 
 		showMask: function(options){
-			this.mask  = $("<div class=\"fwindow-mask\" id=\"fwindow_mask_"+(fatterOS.window.id-1)+"\"></div>").appendTo($(document.body));
-			var width  = $(window).width(),
-				height = $(window).height();
-				this.mask.css({width : width, height : height, "z-index" : fatterOS.window.zIndex+1});
+			var width  = fatterOS.clientInfo.clientWidth,
+				height = fatterOS.clientInfo.clientHeight;
+			this.mask.css({width : width, height : height, "z-index" : (fatterOS.window.zindex-1)});
+			console.log(this.mask.css("z-index"));
 		 },
 		
 		 /* 事件绑定部分*/
@@ -1601,7 +1600,6 @@ $(document).ready(function(){
 					} else {
 						place.append(clone);
 					}
-					fatterOS.cache.clipPlace = content_id;
 				}
 			})
 		},
