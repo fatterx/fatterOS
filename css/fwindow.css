@@ -1,0 +1,189 @@
+.fwindow{
+background-color: #000000;
+border: 1px solid #b4b4b4;
+border-radius: 5px 5px 5px 5px;
+font-size: 12px;
+overflow: hidden;
+padding: 5px;
+position: absolute;
+font: 12px/1.5 'Tahoma','simsun';
+}
+.fwindow-header{  
+color: #FFFFFF;
+font-size: 12px;
+font-weight: bold;
+line-height: 15px;
+padding: 2px 0 4px;
+position: relative;
+height:15px;
+}
+.fwindow-title{
+cursor: move;
+}
+.fwindow-tools{
+position: absolute;
+right: 1px;
+top:0px;
+}
+.fwindow-tools div{
+cursor: pointer;
+display: block;
+float: right;
+height: 16px;
+margin-left: 2px;
+width: 16px;
+}
+.fwindow-tools-close{
+background: url("../images/panel_tools.gif") no-repeat scroll -16px 0 transparent;
+}
+.fwindow-tools-max{
+background: url("../images/panel_tools.gif") no-repeat scroll 0 -16px transparent;
+}
+.fwindow-tools-min{
+background: url("../images/panel_tools.gif") no-repeat scroll 0 0 transparent;
+}
+.fwindow-body{
+background:none #fff;
+overflow:hidden;
+}
+
+/*fwindow resize handler*/
+.fwindow-resize-t{
+cursor: n-resize;
+display: block;
+height: 5px;
+left: 0;
+overflow: hidden;
+position: absolute;
+top: 0px;
+width: 100%;
+z-index: 1;
+}
+.fwindow-resize-l{
+cursor: w-resize;
+display: block;
+height: 100%;
+left: 0;
+overflow: hidden;
+position: absolute;
+top: 0px;
+width: 5px;
+z-index: 1;
+}
+.fwindow-resize-r{
+cursor: e-resize;
+display: block;
+height:100%;
+right: 0px;
+overflow: hidden;
+position: absolute;
+top: 0px;
+width: 5px;
+z-index: 1;
+}
+.fwindow-resize-b{
+cursor: s-resize;
+display: block;
+height: 5px;
+left: 0;
+overflow: hidden;
+position: absolute;
+bottom: 0px;
+width: 100%;
+z-index: 1;
+}
+.fwindow-resize-lt{
+cursor: nw-resize;
+display: block;
+height: 5px;
+left: 0px;
+overflow: hidden;
+position: absolute;
+top: 0px;
+width: 5px;
+z-index: 1;
+}
+.fwindow-resize-rt{
+cursor: ne-resize;
+display: block;
+height: 5px;
+right: 0;
+overflow: hidden;
+position: absolute;
+top: 0px;
+width:5px;
+z-index: 1;
+}
+.fwindow-resize-lb{
+cursor: sw-resize;
+display: block;
+height: 5px;
+left: 0;
+overflow: hidden;
+position: absolute;
+bottom: 0px;
+width: 5px;
+z-index: 1;
+}
+.fwindow-resize-rb{
+cursor: se-resize;
+display: block;
+height: 5px;
+right: 0;
+overflow: hidden;
+position: absolute;
+bottom: 0px;
+width: 5px;
+z-index: 1;
+}
+
+/*fwindow alert,confirm*/
+.fwindow-body-ask{
+padding:5px 10px;
+}
+.fwindow-ask-icon{
+float: left;
+height: 35px;
+width: 47px;
+margin-top:5px;
+}
+.fwindow-ask-icon-info{
+background:url(../images/messager_info.gif) no-repeat;
+}
+.fwindow-ask-icon-error{
+background:url(../images/messager_error.gif) no-repeat;
+}
+.fwindow-ask-icon-question{
+background:url(../images/messager_question.gif) no-repeat;
+}
+.fwindow-ask-icon-warning{
+background:url(../images/messager_warning.gif) no-repeat;
+}
+.fwindow-ask-text{
+margin-top:10px;
+}
+.fwindow-button-div{
+text-align:center;
+}
+.fwindow-button-div input{
+width:50px;
+margin:0 10px;
+}
+
+/*iframe*/
+.fwindow-grid{
+height:100%;
+overflow:hidden;
+}
+
+/*mask*/
+.fwindow-mask{
+position:fixed;
+top:0;
+left:0;
+opacity:0.6;
+background:#000;
+display:block;
+overflow:hidden;
+}
+

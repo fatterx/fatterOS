@@ -1,104 +1,186 @@
-<!doctype html>
-<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
-<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
-<html>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
-  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
-  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script type="text/javascript" src="javascripts/script.js"></script>
-
-  <title>Fatteros</title>
-  <meta name="description" content="">
-
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-
+	<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+	<title>fatterOS</title>
+	<link href="css/common.css" rel="stylesheet" type="text/css" />
+	<link href="css/index.css" rel="stylesheet" type="text/css" />
+	<link href="css/fwindow.css" rel="stylesheet" type="text/css" />
+	<link href="css/filemgr.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/fatterOS.js"></script>
+	<script type="text/javascript">
+　　	window.onbeforeunload = function(){
+			return "你确定要退出么";
+		};
+	</script>
 </head>
-
 <body>
+	<!--预启动-->
+	<div id="preload">
+		<div id="starting_logo">
+    		<img src="images/start_1.png" alt="starting"/>
+  		</div>
+		<span id="starting_text">Starting...</span>
+		<div id="starting_bar">
+			<div id="percentage"></div><span id="percentage_text"></span>
+		</div>
+	</div>
 
-  <div class="wrapper">
-    <header>
-      <h1 class="title">Fatteros</h1>
-    </header>
-    <div id="container">
-      <p class="tagline"></p>
-      <div id="main" role="main">
-        <div class="download-bar">
-        <div class="inner">
-          <a href="https://github.com/fatterx/fatterOS/tarball/master" class="download-button tar"><span>Download</span></a>
-          <a href="https://github.com/fatterx/fatterOS/zipball/master" class="download-button zip"><span>Download</span></a>
-          <a href="https://github.com/fatterx/fatterOS" class="code">View Fatteros on GitHub</a>
-        </div>
-        <span class="blc"></span><span class="trc"></span>
-        </div>
-        <article class="markdown-body">
-          <hr><ul>
-<li>                                                                            *</li>
-<li>     This is a  WebOS written by fatter. Some materails are collected from  *</li>
-<li>Internet. In this webOS, you can install a new application like Q plus's    *</li>
-<li>application. Most of all, you can use filemgr as Explorer on windows or     *</li>
-<li>Nautilus on linux. For example, you can moveSelect your files, then use     *</li>
-<li>contextMenu or shortcut buttons to copy/cut/delete those files.             *</li>
-<li>                                                                            *</li>
-<li>                                                                            *<br>
-</li>
-<li>                                                                            *</li>
-<li>                                                                            *
-* ********                                               ***            **    *
-* *                                                    *      *       *    *  *
-* *                    *       *     ****    *   *   *          *    *        *
-* *****     ***      ****    ****   *    *   * *     *          *      *      *
-* *        *    *      *       *    ******   *       *          *         *   *
-* *        *    *      *       *    *        *         *      *       *    *  *
-* *         ***  **    *       *     ****    *           ***            *     *</li>
-<li>                                                                            *</li>
-<li>                                                                            *</li>
-<li>   Starting...  &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;====================  70%   *<br>
-</li>
-<li>                                                                            *</li>
-<li>                                                                            *</li>
-<li>   To be continued ...                                                      *</li>
-<li>                                                                            *</li>
-<li>   E-mail:  <a href="mailto:lwn888@gmail.com">lwn888@gmail.com</a>                                                *</li>
-<li>   Blog:    <a href="http://lwn.iteye.com">http://lwn.iteye.com</a>                                            *</li>
-<li>   QQ:      84922221                                                        *</li>
-<li>                                                                            *
-*******************************************************************************</li>
-</ul>
-        </article>
-      </div>
-    </div>
-    <footer>
-      <div class="owner">
-      <p><a href="https://github.com/fatterx" class="avatar"><img src="https://secure.gravatar.com/avatar/3cc2277e0b5829162c5de535c7f384bc?s=30&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png" width="48" height="48"/></a> <a href="https://github.com/fatterx">fatterx</a> maintains <a href="https://github.com/fatterx/fatterOS">Fatteros</a></p>
+	<!--桌面图标-->
+	<div id="desktop">
+		<div id="desktop_button_container">
+			<div id="app_001" data-name="连连看" data-type="llk" class="app-button" style="left: 0px; top: 30px;">
+				<div class="app-icon" style="background-image:url(images/SunFlower.png)">
+				</div>
+				<div class="app-name-wrap">
+					<span class="app-name">连连看</span>
+				</div>
+			</div>
+			<div id="app_002" data-name="豆瓣FM" data-type="douban" class="app-button" style="left: 0px; top: 110px;">
+				<div class="app-icon" style="background-image:url(images/mid.png)">
+				</div>
+				<div class="app-name-wrap">
+					<span class="app-name">豆瓣FM</span>
+				</div>
+			</div>
+			<div id="app_003" data-name="系统设置" class="app-button" style="left: 0px; top: 190px;">
+				<div class="app-icon" style="background-image:url(images/Control_Panel.png)">
+				</div>
+				<div class="app-name-wrap">
+					<span class="app-name">系统设置</span>
+				</div>        
+			</div>
+			<div id="app_004" data-name="浏览器" class="app-button" style="left: 80px; top: 30px;">
+				<div class="app-icon" style="background-image:url(images/browser.png)">
+				</div>
+				<div class="app-name-wrap">
+					<span class="app-name">浏览器</span>
+				</div>        
+			</div>
+			<div id="app_005" data-name="记事本" class="app-button" style="left: 80px; top: 110px;">
+				<div class="app-icon" style="background-image:url(images/notepad.png)">
+				</div>
+				<div class="app-name-wrap">
+					<span class="app-name">记事本</span>
+				</div>        
+			</div>
+			<div id="app_006" data-name="资源管理器" data-type="filemgr" class="app-button" style="left: 80px; top: 190px;">
+				<div class="app-icon" style="background-image:url(images/winrar.png)">
+				</div>
+				<div class="app-name-wrap">
+					<span class="app-name">资源管理器</span>
+				</div>        
+			</div>
+		</div>
+	</div>
 
+	<!--任务栏-->
+	<div id="bottombar">
+		<div id="bottom_body">
+			<div id="start_button">
+				<img alt="开始" src="images/start_1.png" id="start_icon"/>
+			</div>
+			<div id="start_menu">
+				<div id="start_menu_body">
+					<div class="start-app">
+						<span class="start-app-button logout"></span>
+						<a href="#">注销</a>
+					</div>
+					<div class="start-app">
+						<span class="start-app-button logout"></span>
+						<a href="#">注销</a>
+					</div>
+					<div class="start-app">
+						<span class="start-app-button logout"></span>
+						<a href="#">注销</a>
+					</div>
+					<div class="start-app">
+						<span class="start-app-button shortcut"></span>
+						<a href="#">桌面图标</a>
+					</div>
+					<div class="start-app">
+						<span class="start-app-button setting"></span>
+						<a href="#">设置</a>
+					</div>
+					<div class="start-app" id="start_app_help">
+						<span class="start-menu_arrow"></span>
+						<span class="start-app-button help"></span>
+						<a href="#">帮助</a>
+					</div>
+					<div class="start-app">
+						<span class="start-app-button lock"></span>
+						<a href="#">锁定</a>
+					</div>
+					<div id="start_app_sub_container">
+						<div id="start_app_sub_body">	
+							<div class="start-sub-top">
+							</div>
+							<div class="start-app-sub">
+								<span class="start-app-button logout"></span>
+								<a href="#">注销</a>
+							</div>
+							<div class="start-app-sub">
+								<span class="start-app-button setting"></span>
+								<a href="#">设置</a>
+							</div>
+							<div class="start-app-sub">
+								<span class="start_app-button lock"></span>
+								<a href="#">锁定</a>
+							</div>
+							<div class="start-sub-bottom">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="start_menu_right">
+					<div id="user_info">
+						<div id="user_pic">
+							<img alt="admin" src="images/user-info.gif"/>
+						</div>
+						<div id="user_name">
+							<b>fatter</b>
+						</div>
+					</div>
+					<div id="start_app_right">
+						<div>
+							<span class="start-app-button logout"></span>
+							<a href="#">注销</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="quick_start">
+				<img alt="PS" src="images/PhotoshopCS.png" id="quick_icon_1"/>
+				<img alt="Office" src="images/office_2003.png" id="quick_icon_2"/>
+			</div>
+			<div id="taskbar">
+			</div>
+			<div id="notice">
+				<div id="timebar"></div>	
+			</div>
+			<div id="showDesktop" title="显示桌面">
+			</div>
+		</div>
+	</div>
 
-      </div>
-      <div class="creds">
-        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br/>theme by <a href="http://twitter.com/jonrohan/">Jon Rohan</a></small>
-      </div>
-    </footer>
-  </div>
-  <div class="current-section">
-    <a href="#top">Scroll to top</a>
-    <a href="https://github.com/fatterx/fatterOS/tarball/master" class="tar">tar</a><a href="https://github.com/fatterx/fatterOS/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
-    <p class="name"></p>
-  </div>
+	<!--搜索栏-->
+	<div class="desktop-search-bar">
+		<input value="搜索..." class="desktop-search-input" id="search_input">	
+		<input type="button" title="搜索..." class="desktop-search-button" id="search_button" value="">
+	</div>
 
-            <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-32430014-1");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
+	<!--右键菜单-->
+	<div id="fatterOS_context"></div>
 
+	<!--背景云-->
+	<div class="scene-cloud-container">
+		<div class="scene-cloud"></div>
+	</div>
+
+	<!--移动、改变尺寸-->
+	<div class="fwindow-resize-helper"></div>
+	<!--遮罩层-->
+	<div class="fwindow-mask"></div>
 </body>
 </html>
