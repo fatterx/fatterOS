@@ -8,7 +8,6 @@
 	<link href="css/fwindow.css" rel="stylesheet" type="text/css" />
 	<link href="css/filemgr.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/jquery.progressbar.min.js"></script>
 	<script type="text/javascript" src="js/fatterOS.js"></script>
 	<script type="text/javascript">
 　　	window.onbeforeunload = function(){
@@ -23,17 +22,19 @@
     		<img src="images/start_1.png" alt="starting"/>
   		</div>
 		<span id="starting_text">Starting...</span>
-  		<div id="starting_bar"></div>
+		<div id="starting_bar">
+			<div id="percentage"></div><span id="percentage_text"></span>
+		</div>
 	</div>
 
 	<!--桌面图标-->
 	<div id="desktop">
 		<div id="desktop_button_container">
-			<div id="app_001" data-name="时间" class="app-button" style="left: 0px; top: 30px;">
-				<div class="app-icon" style="background-image:url(images/clock.png)">
+			<div id="app_001" data-name="连连看" data-type="llk" class="app-button" style="left: 0px; top: 30px;">
+				<div class="app-icon" style="background-image:url(images/SunFlower.png)">
 				</div>
 				<div class="app-name-wrap">
-					<span class="app-name">时间</span>
+					<span class="app-name">连连看</span>
 				</div>
 			</div>
 			<div id="app_002" data-name="豆瓣FM" data-type="douban" class="app-button" style="left: 0px; top: 110px;">

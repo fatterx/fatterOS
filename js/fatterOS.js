@@ -971,17 +971,21 @@ $(document).ready(function(){
 				var self = this;
 
 				$.ajax({
-						url:"file.php",
-						data:"get=filetree",
+						url:"files.json",
 						dataType:'json',
-						success:function(d){
-							$.each(d,function(i){
-								$("<li>"+d[i].name+"</li>").appendTo(self.$file_tree)
+						success:function(json){
+					//		var json = (new Function("return "+data))();
+							if(json.length){
+								return;
+							}
+							$.each(json,function(item){
+								$("<li>"+item+"</li>").appendTo(self.$file_tree)
 														   .bind("click",function(e){
 																e.stopPropagation();
 																self.$file_tree.find("li").removeClass("selected");
 																$(this).addClass("selected");
-																self.showFile("/"+fatterOS.tools.encodeChinese(this.innerHTML),this.innerHTML);
+																self.showFile("/"+this.innerHTML,this.innerHTML);
+														//		self.showFile("/"+fatterOS.tools.encodeChinese(this.innerHTML),this.innerHTML);
 								});
 							});
 						}
@@ -1002,16 +1006,20 @@ $(document).ready(function(){
 					hashNo = 0,
 					hashList = [],
 					fileName = [],
-					$tag;
-				
+					$tag,
+					match = url.match(/[^\/]+/g);
 				$.ajax({
-						url:"file.php",
-						data:"path="+url,
+						url:"files.json",
 						dataType:"json",
-						success:function(data){
-							$.each(data,function(i){		
-								files_html += "<div data-name="+data[i].name+" data-key="+data[i].key+" class=\"docs-list\"><div class=\"file-"+data[i].type+"\"><img src=\"images/ext/"+data[i].type+".png\" alt=\"\" /><span class=\"filename\">"+data[i].name+"</span><input type=\"text\" value="+data[i].name+" class=\"rename-text\" /></div></div>";
-								fileName.push(data[i].name);
+						success:function(json){
+							var dir = json;
+							for(var i=0,length=match.length; i<length; i++){
+								dir = dir[match[i]];
+							}
+							dir = dir["."];
+							$.each(dir,function(i){
+								files_html += "<div data-name="+dir[i].name+" data-key="+dir[i].md5+" class=\"docs-list\"><div class=\"file-"+dir[i].type+"\"><img src=\"images/ext/"+dir[i].type+".png\" alt=\"\" /><span class=\"filename\">"+dir[i].name+"</span><input type=\"text\" value="+dir[i].name+" class=\"rename-text\" /></div></div>";
+								fileName.push(dir[i].name);
 							});
 
 							if( target == "_blank" ){
@@ -1452,14 +1460,35 @@ $(document).ready(function(){
 			var $preload = 	$("#preload"),
 				$startingBar = $("#starting_bar"),
 				clientHeight = fatterOS.clientInfo.clientHeight(),
-				clientWidth = fatterOS.clientInfo.clientWidth();
-
-			$startingBar.progressBar(100,{speed:25,callback:function(data){
-				if( data.running_value == data.value ){
-					$preload.fadeOut("slow");
-				}
-			}});
+				clientWidth = fatterOS.clientInfo.clientWidth(),
+				imgQueue = ['start_1.png','start_2.png','start_3.png','portal_all_png.png','cloud1.png','bg4.jpg','user-info.gif','setting.png','panel_tools.gif','ext/default.png','ext/doc.png','ext/folder.png','ext/ppt.png','ext/rar.png','ext/txt.png','ext/xls.png'];
+			
+			this.loadIMG(imgQueue);
+			$preload.fadeOut("slow");
 			return this;
+		},
+
+		loadIMG:function(queue){
+			var image = new Image(),
+				self = this,
+				percentage,
+				$percentage = $("#percentage"),
+				$percentageText = $("#percentage_text"),
+				src, percentageText;
+
+			if(queue.length > 0){
+				src = "images/" + queue.shift();
+				image.src = src;
+				image.onload = function(){
+					percentage = (16 - queue.length) / 16; 
+					$percentage.width(percentage * 125);
+					percentageText = (percentage.toFixed(2) * 100) + "%";
+					$percentageText.html(percentageText);
+					if(queue.length > 0){
+						self.loadIMG(queue);
+					}
+				}
+			}
 		},
 
 		contextmenu: function(place,srcE){
@@ -1954,7 +1983,9 @@ $(document).ready(function(){
 				else if(type === "widget")
 					new fatterOS.widget();
 				else if(type === "douban"){
-					fatterOS.iframe("http://douban.fm/partner/qq_plus",{title:"豆瓣FM",width:"550"})
+					fatterOS.iframe("http://douban.fm/partner/qq_plus",{title:"豆瓣FM",width:560})
+				} else if(type === "llk"){
+					fatterOS.iframe("../llk",{title:"植物大战僵尸连连看",width:912,height:678});
 				}
 
 			}
